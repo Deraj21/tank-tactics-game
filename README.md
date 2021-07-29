@@ -1,3 +1,7 @@
+## Explanation
+This is a game prototype created by people at the __Blank__ game studio, most known for creating Fruit Ninja and 
+
+
 ### Requirements
 - board of squares
 - each player has a tank
