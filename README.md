@@ -25,10 +25,11 @@ This is a game prototype created by people at the __Blank__ game studio, most kn
 ### Todo
 - [x] get board displaying
 - [x] get 'tanks' displaying
-- [ ] tanks have action points
-- [ ] tanks have range
-- [ ] tanks have health
+- [x] tanks have action points
+- [x] tanks have range
+- [x] tanks have health
 - [ ] tanks drag and drop to move
+- [ ] make tanks look pretty
 - [ ] 'shoot' other tanks
 - [ ] tanks take damage
 

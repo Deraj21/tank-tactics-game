@@ -48,6 +48,10 @@ table {
   border-spacing: 0;
 }
 
+.body div p {
+  box-sizing: border-box;
+}
+
 #game-board {
   margin: 10px;
 }
@@ -60,8 +64,8 @@ table {
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 80px;
-  width: 80px;
+  height: 100px;
+  width: 100px;
   margin: 3px;
   background-color: azure;
   border: 1px solid black;
@@ -69,10 +73,35 @@ table {
 }
 
 .Tank {
-  height: 60px;
-  width: 60px;
+  height: 80px;
+  width: 80px;
   border: 1px solid black;
   border-radius: 3px;
+}
+.Tank div, .Tank p {
+  margin: 1px auto;
+  text-align: center;
+}
+.Tank .heart-container {
+  display: flex;
+}
+.Tank .heart-container .heart {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid red;
+}
+.Tank .heart-container .filled {
+  background-color: red;
+}
+.Tank .point-token {
+  width: 20px;
+  height: 20px;
+  line-height: 20px;
+  text-align: center;
+  border: 2px solid green;
+  border-radius: 50%;
+  background-color: limegreen;
 }
 
 /*# sourceMappingURL=style.css.map */

@@ -1,7 +1,8 @@
-const   NUM_COLS = 10,
-        NUM_ROWS = 10,
-        NUM_PLAYERS = 3,
-        TANK_COLORS = ['blue', 'red', 'green', 'yellow']
+const   NUM_COLS = 5,
+        NUM_ROWS = 5,
+        NUM_PLAYERS = 1,
+        TANK_COLORS = ['LightCoral', 'Orange', 'Khaki', 'MediumPurple', 'PaleGreen', 'MediumAquamarine', 'LightSkyBlue', 'Silver', 'BurlyWood' ],
+        TANK_NAMES = ['Sally', 'Randy', 'Jared', 'Tom', 'Sam', 'Bryan', 'Allen']
 
 // set up game board
 const gameBoard = document.getElementById("game-board")
@@ -28,5 +29,10 @@ for (let r = 0; r < NUM_ROWS; r++){
 
 // create & append tanks
 for (let i = 0; i < NUM_PLAYERS; i++){
-    new Tank(NUM_ROWS, NUM_COLS, TANK_COLORS[i%TANK_COLORS.length])
+    new Tank(
+        NUM_ROWS, NUM_COLS,
+        TANK_COLORS[i%TANK_COLORS.length],
+        TANK_NAMES[i%TANK_NAMES.length],
+        i
+    )
 }
