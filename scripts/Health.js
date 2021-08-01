@@ -15,7 +15,6 @@ class Health extends MyElement {
             this.heartContainer.appendChild( currentHeart )
         }
 
-
         this.setValue(value)
     }
 

@@ -23,14 +23,16 @@ This is a game prototype created by people at the __Blank__ game studio, most kn
 
 
 ### Todo
-- [x] get board displaying
-- [x] get 'tanks' displaying
-- [x] tanks have action points
-- [x] tanks have range
-- [x] tanks have health
-- [ ] tanks drag and drop to move
-- [ ] make tanks look pretty
+- [ ] clicking brings up shoot menu
+  - [ ] everying but the board goes doark
+  - [ ] top of screen says 'shooting; click to cancel'
 - [ ] 'shoot' other tanks
 - [ ] tanks take damage
+- [ ] make tanks look pretty
+- [ ] make board look pretty
+- [ ] tanks die
+- [ ] dead players become part of the jury
+- [ ] board generates dynamically based on screen size
+- [ ] every action logs message in the right side of the screen
 
 

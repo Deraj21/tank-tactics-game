@@ -1,3 +1,5 @@
+let tankPositions = []
+
 class Tank extends MyElement {
     constructor(numRows, numCols, color, name, id){
         super()
@@ -6,7 +8,7 @@ class Tank extends MyElement {
             r: 0,
             c: 0
         }
-        this.actionPoints = 0
+        this.actionPoints = 99
         this.health = 3
         this.range = 2
         this.id = id
@@ -15,10 +17,13 @@ class Tank extends MyElement {
         this.randomizePos(numRows, numCols)
         
         // tank element
-        this.element = document.createElement('div')
-        this.element.className = 'Tank'
+        this.element = this.createElement('div', {
+            className: 'Tank' + (this.actionPoints > 0 ? ' draggable' : ''),
+            id: `tank-${id}`,
+            draggable: true,
+            ondragstart: this._dragStart.bind(this)
+        })
         this.element.style.backgroundColor = color
-
         // range
         let rangeElement = this.createElement('p', {
             className: 'tank-range',
@@ -26,7 +31,7 @@ class Tank extends MyElement {
         })
         this.element.appendChild(rangeElement)
         // health
-        let h = new Health(2)
+        let h = new Health(this.health)
         let healthElement = h.heartContainer
         this.element.appendChild(healthElement)
         // id & name
@@ -36,11 +41,11 @@ class Tank extends MyElement {
         })
         this.element.appendChild(nameElement)
         // action points
-        let pointsElement = this.createElement('div', {
+        this.pointsElement = this.createElement('div', {
             className: "point-token",
             innerHTML: this.actionPoints
         })
-        this.element.appendChild(pointsElement)
+        this.element.appendChild(this.pointsElement)
 
         this.appendTank()
     }
@@ -51,12 +56,19 @@ class Tank extends MyElement {
         square.appendChild(this.element)
     }
 
-    drag(){
+    _dragStart(e){
+        if (this.actionPoints < 1){
+            return;
+        }
 
+        e.dataTransfer.dropEffect = "move"
+        e.dataTransfer.setData("text/id", e.target.id)
     }
 
-    drop(){
-
+    move(r, c){
+        this.position.r = r
+        this.position.c = c
+        this.loseActionPoint()
     }
 
     randomizePos(numRows, numCols){
@@ -80,6 +92,21 @@ class Tank extends MyElement {
 
     gainActionPoint(){
         this.actionPoints++
+
+        if (this.actionPoints > 0){
+            this.element.draggable = true
+            this.element.classList.add('draggable')
+        }
+    }
+
+    loseActionPoint(){
+        this.actionPoints--
+        this.pointsElement.innerHTML = this.actionPoints
+
+        if (this.actionPoints < 1){
+            this.element.draggable = false
+            this.element.classList.remove('draggable')
+        }
     }
 
 }
