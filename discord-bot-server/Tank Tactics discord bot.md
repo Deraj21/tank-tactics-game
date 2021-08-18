@@ -1,5 +1,6 @@
 # Tank Tactics discord bot <!-- omit in toc -->
 - [User Requirements](#user-requirements)
+- [Ideas](#ideas)
 - [List of Commands](#list-of-commands)
   - [Admins](#admins)
   - [Players](#players)
@@ -31,6 +32,12 @@
 
 ---
 
+## Ideas
+- use hashColor to give each tank unique color fron username
+- use svg to generate board?
+
+---
+
 ## List of Commands
 ### Admins
 - `$give-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
@@ -53,17 +60,20 @@
 ## Replit Todo
 ### Create classes to handle logic
 - Game
-  - `giveDailyTokens()`
-  - `addPlayer(string username)`
-  - `startGame()`
-  - `endGame()`
+  - discord command methods
+    - `giveDailyTokens()`
+    - ~~`addPlayer(string username)`~~
+    - ~~`startGame()`~~
+    - ~~`endGame()`~~
+    - `vote(username)` : can only be done if isDead = true
 - Player
-  - `move(string direction)`
-  - `shoot(coordinates)`
-  - `upgradeRange()`
-  - `giftActionToken(coordinates)`
-  - `vote(username)` : can only be done if isDead = true
-  - add more methods as needed
+  - command methods
+    - ~~`move(string direction)`~~
+    - `shoot(coordinates)`
+    - ~~`upgradeRange()`~~
+    - `giftActionToken(coordinates)`
+  - other methods
+    - `hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables
