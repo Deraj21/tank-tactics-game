@@ -61,11 +61,13 @@
 ### Create classes to handle logic
 - Game
   - discord command methods
-    - `giveDailyTokens()`
+    - ~~`giveDailyTokens()`~~
     - ~~`addPlayer(string username)`~~
     - ~~`startGame()`~~
     - ~~`endGame()`~~
-    - `vote(username)` : can only be done if isDead = true
+    - ~~`vote(voter, recipient)` : can only be done if voeter is dead~~
+  - other methods
+    - `randomizePlayerPositions()`
 - Player
   - command methods
     - ~~`move(string direction)`~~
@@ -73,7 +75,7 @@
     - ~~`upgradeRange()`~~
     - `giftActionToken(coordinates)`
   - other methods
-    - `hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)
+    - ~~`hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)~~
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables
@@ -98,3 +100,20 @@
     - "be nice to each other, it's just a game, etc."
   - create how to write commands pinned post
 
+
+
+<!-- Board 10x10
+
+  0 1 2 3 4 5 6 7 8 9
+a . . . . . . . . . .
+b . . . . . . . . . .
+c . . . r . . . . . .
+d . . . . . . j . . .
+e . . . . . . . . . .
+f . . . . . . t . . .
+g . . . . . . . . . .
+h . . . . . a . . . .
+i . . . . . . . . . .
+j . . . . . . . . . .
+
+-->

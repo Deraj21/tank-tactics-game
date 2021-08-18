@@ -1,10 +1,5 @@
-const DIR = ['N','S','W','E','NW','SW','NE','SE']
-
-const   NUM_ROWS = 10,
-        NUM_COLS = 10,
-        BOUNDS_ERR = "ERROR: tank cannot move out of bounds",
-        CARDINAL_DIR_ERR = "ERROR: incorrect cardinal direction",
-        NOT_ENOUGH_TOKENS_ERR = 'ERROR: you do not have any action tokens'
+const   Utils = require('./Utilities'),
+        Error = require('./ErrorCodes')
 
 /**
  * Player
@@ -14,30 +9,36 @@ class Player {
      * 
      * @param {string} username - player username
      */
-    constructor(username){
+    constructor(username, getPlayerPositions){
         this.name = username
         this.health = 3
         this.actionTokens = 0
         this.range = 2
         this.position = { r: 0, c: 0 }
-        this.color = '' // TODO: hash color here
+        this.color = Utils.hashRGB(username)
+        this.isDead = false
+
+        this.getPlayerPositions = getPlayerPositions
     }
 
     /**
-     * @param {string} direction - cardinal direction i.e 'S' or 'NW'
+     * @param {string} dir - cardinal direction i.e 'S' or 'NW'
+     * @param {Array} playersPos - array player positions
      */
     move(dir){
         if (this.actionTokens === 0){
-            console.log(NOT_ENOUGH_TOKENS_ERR)
-            return NOT_ENOUGH_TOKENS_ERR
+            console.log(Error['003'])
+            return '003'
         }
-        this.actionTokens--
+
+        let oldPos = { ...this.position }
+        const playersPos = this.getPlayerPositions()
 
         // parse string
         dir = dir.toUpperCase()
-        if (!DIR.includes(dir)){
-            console.log(CARDINAL_DIR_ERR)
-            return -1
+        if (!Utils.DIRECTIONS.includes(dir)){
+            console.log(Error['002'])
+            return '002'
         }
         let result = dir.split('')
         
@@ -71,52 +72,83 @@ class Player {
                 break;
         }
 
-        // check bounds
-        if (this.position.r < 0){
-            this.position.r = 0
-            console.log(BOUNDS_ERR)
-            return -1
-        } else if (this.position.r > NUM_ROWS-1){
-            this.position.r = NUM_ROWS-1
-            console.log(BOUNDS_ERR)
-            return -1
+        // check out of bounds
+        if (this.position.r < 0 || this.position.r > Utils.NUM_ROWS-1 || this.position.c < 0 || this.position.c > Utils.NUM_COLS-1){
+            this.position = { ...oldPos }
+            console.log(Error['001'])
+            return '001'
         }
-        if (this.position.c < 0){
-            this.position.c = 0
-            console.log(BOUNDS_ERR)
-            return -1
-        } else if (this.position.c > NUM_COLS-1){
-            this.position.c = NUM_COLS-1
-            console.log(BOUNDS_ERR)
-            return -1
+
+        // check ran into other players
+        let ranIntoPlayer = false
+        playersPos.forEach(pos => {
+            if (pos.r === this.position.r && pos.c === this.position.c){
+                ranIntoPlayer = true
+                return
+            }
+        })
+        if (ranIntoPlayer){
+            this.position = { ...oldPos }
+            console.log(Error['008'])
+            return '008'
         }
         
+        this.actionTokens--
+        
+    }
+
+    shoot(coords){
+        // parse coordinates
+        coords = coords.toUpperCase()
+        let splitCoords = coords.split('')
+        // check valid coordinates
+        let row = Utils.ROW_NAMES.findIndex((name, i) => {
+            return name === splitCoords[0]
+        })
+        if (row === -1 || splitCoords[1].match(/\d/) === null){
+            console.log("ERROR: " + Error['009'])
+            return '009'
+        }
+        
+        let col = parseInt(splitCoords[1])
+
+        console.log(row, col)
+        
+
+        // check sufficient action points
+
+        // check sufficient range
+
     }
     
     upgradeRange(){
         if (this.actionTokens === 0){
-            console.log(NOT_ENOUGH_TOKENS_ERR)
-            return NOT_ENOUGH_TOKENS_ERR
+            console.log(Error['003'])
+            return '003'
         }
-        this.actionTokens--
-        
         this.range++
+        this.actionTokens--
     }
 
-    printInfo(){
+    printInfo(long = false){
         let { name, health, actionTokens, range, position, color } = this
         let { r, c } = position
-
-        console.log(
-            `name:          ${name}\n` + 
-            `health:        ${health}\n` + 
-            `actionTokens:  ${actionTokens}\n` + 
-            `range:         ${range}\n` + 
-            `position:      [${r}, ${c}]\n` + 
-            `color:         ${color}\n`
-        )
+        if (long){
+            console.log(
+                `name:          ${name}\n` + 
+                `health:        ${health}\n` + 
+                `range:         ${range}\n` + 
+                `actionTokens:  ${actionTokens}\n` + 
+                `position:      [${r}, ${c}]\n` + 
+                `color:         ${color}\n`
+            )
+        } else {
+            console.log(
+                `${name}: ${health}hp ${range}r ${actionTokens}at`
+            )
+        }
     }
 }
 
-module.exports = { Player }
+module.exports = Player
 
