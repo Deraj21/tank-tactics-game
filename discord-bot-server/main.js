@@ -20,7 +20,7 @@ game.giveDailyTokens(5)
 // moving
 
 // shooting
-tim.shoot('a6')
+tim.shoot('d9')
 
 // print
 game.printPlayers()

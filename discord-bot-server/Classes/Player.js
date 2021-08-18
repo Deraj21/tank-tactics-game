@@ -98,31 +98,44 @@ class Player {
     }
 
     shoot(coords){
+        let { range } = this
+        let { r, c } = this.position
+
+        if (this.actionTokens < 1){
+            console.log(Error['003'])
+            return '003'
+        }
+
         // parse coordinates
         coords = coords.toUpperCase()
         let splitCoords = coords.split('')
+        
         // check valid coordinates
         let row = Utils.ROW_NAMES.findIndex((name, i) => {
             return name === splitCoords[0]
         })
-        if (row === -1 || splitCoords[1].match(/\d/) === null){
-            console.log("ERROR: " + Error['009'])
+        if (splitCoords.length > 2 || row === -1 || splitCoords[1].match(/\d/) === null){
+            console.error(Error['009'])
             return '009'
         }
-        
         let col = parseInt(splitCoords[1])
 
-        console.log(row, col)
-        
-
-        // check sufficient action points
-
         // check sufficient range
+        if (Math.abs(row - r) > range || Math.abs(col - c) > range){
+            console.error(Error['010'])
+            return '010'
+        }
 
+        // check player at coordinates '011'
+
+        // have player take damage
+
+        // remove action token
+        this.actionTokens--
     }
     
     upgradeRange(){
-        if (this.actionTokens === 0){
+        if (this.actionTokens < 1){
             console.log(Error['003'])
             return '003'
         }

@@ -8,8 +8,15 @@ module.exports = {
     "007": "Player does not exist",
     "008": "You are not allowed to move to another player's space",
     "009": "Invalid coordinates",
-    "010": "",
-    "011": "",
+    "010": "You do not have enough range",
+    "011": "You have aimed at nothing",
     "012": "",
-    "013": ""
+    "013": "",
+    "014": "",
+    "015": "",
+    "016": "",
+    "017": "",
+    "018": "",
+    "019": "",
+    "020": ""
 }
