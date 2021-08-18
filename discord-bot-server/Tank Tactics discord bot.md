@@ -33,7 +33,7 @@
 
 ## List of Commands
 ### Admins
-- `$add-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
+- `$give-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
 - `$add-player <user_name>`: add player with `user_name` to the game
 - `$start-game`: starts the game; board is displayed
 - `$end-game`: ?(maybe) ends the current game; new game is ready to accept new players
@@ -48,19 +48,22 @@
 ### Jurers (dead players)
 - `$vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the `$add-tokens` command is used
 
-
 ---
 
 ## Replit Todo
 ### Create classes to handle logic
 - Game
-  - `initilizeGame()` : sets up pre-game phase (called by contructor)
-  - `addPlayer()` : adds player to the game
-  - `startGame()` : starts game
+  - `giveDailyTokens()`
+  - `addPlayer(string username)`
+  - `startGame()`
+  - `endGame()`
 - Player
-  - `shoot()`
-  - `takeDamage()`
-  - etc...
+  - `move(string direction)`
+  - `shoot(coordinates)`
+  - `upgradeRange()`
+  - `giftActionToken(coordinates)`
+  - `vote(username)` : can only be done if isDead = true
+  - add more methods as needed
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables
