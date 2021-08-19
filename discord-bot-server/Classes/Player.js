@@ -1,5 +1,6 @@
 const   Utils = require('./Utilities'),
-        Error = require('./ErrorCodes')
+        Error = require('./ErrorCodes'),
+        db =    require('./Database')
 
 /**
  * Player

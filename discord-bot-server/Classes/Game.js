@@ -1,6 +1,7 @@
 const   Player = require('./Player'),
         Error = require('./ErrorCodes'),
-        Utils = require('./Utilities')
+        Utils = require('./Utilities'),
+        db =    require('./Database')
 
 /**
  * Game

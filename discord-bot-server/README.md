@@ -59,6 +59,7 @@
 
 ## Replit Todo
 ### Create classes to handle logic
+- Change code to work more like a database with helper classes
 - Game
   - discord command methods
     - ~~`giveDailyTokens()`~~
@@ -76,6 +77,18 @@
     - `giftActionToken(coordinates)`
   - other methods
     - ~~`hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)~~
+- Database
+  - createPlayer
+  - getPlayer
+  - getPlayers
+  - updatePlayer
+  - updateVote
+  - getVotes
+  - getGameStarted
+  - setGameStarted
+  - getGameEnded
+  - setGameEnded
+  - resetGame
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables
