@@ -1,12 +1,12 @@
 # Tank Tactics discord bot <!-- omit in toc -->
 - [User Requirements](#user-requirements)
-- [Ideas](#ideas)
+  - [Post-mvp](#post-mvp)
+- [Questions](#questions)
 - [List of Commands](#list-of-commands)
   - [Admins](#admins)
   - [Players](#players)
   - [Jurers (dead players)](#jurers-dead-players)
 - [Replit Todo](#replit-todo)
-  - [Create classes to handle logic](#create-classes-to-handle-logic)
   - [Create Node server events](#create-node-server-events)
   - [Create database](#create-database)
 - [Discord Server Todo](#discord-server-todo)
@@ -29,12 +29,25 @@
 - I need a way to join the game
   - admin command
 - As a Jurer (dead player), I need to votte for a person to get an extra action token; I need this vote to be anonymous
+### Post-mvp
+- give **admin** commands to edit game settings while players are joining; this could be coupled with another command to list all the settings and the appropriate values. (or maybe we maintain this in a pinned comment)
+  - settings examples: board_size, starting_health, starting_tokens, daily_token_count, starting_range, etc.
+  - `$game-setting <setting> <value>`
+    - *example: `$game-setting starting_health 2`*
 
 ---
 
-## Ideas
-- use hashColor to give each tank unique color fron username
-- use svg to generate board?
+## Questions
+- How do I visualize the board?
+  - **Discord bot sends ASCII-art** messages as replies to commands
+    - PROs: low-effort and self-contained; everything is done within discord
+    - CONs: not great looking; not super easy to read, might cause confusion
+  - **Create separate website** hosted on replit that reads the database, and displays the board
+    - PROS: medium-effort, code is mostly written; I can make it look as pretty as I want
+    - CONS: not self-contained (you have to leave discord to view web page)
+  - **Discord bot creates and posts images**
+    - PROS: I can make it very pretty & readable; not need to leave Discord to view board
+    - CONS: *not* low effort; I'm not even sure if it's possible with the tools I have
 
 ---
 
@@ -47,7 +60,7 @@
 ### Players
 *Note: when a player tries to use a command they don't have action tokens for, a message from the bot telling them how many tokens they have is displayed*
 - `$move <cardinal_direction>`: move player 1 space in `cardinal_direction`
-  - *examples: `move NW` , `$move e`*
+  - *examples: `$move NW` , `$move e`*
 - `$shoot <coords>`: player shoots at `coords` (coords formatted as a single letter A-J followed by a digit 0-9)
   - *examples: `$shoot c4` , `$shoot H0`*
 - `$upgrade-range`: player adds 1 to their range
@@ -58,39 +71,6 @@
 ---
 
 ## Replit Todo
-### Create classes to handle logic
-- Change code to work more like a database with helper classes
-- Game
-  - discord command methods
-    - ~~`giveDailyTokens()`~~
-    - ~~`addPlayer(string username)`~~
-    - ~~`startGame()`~~
-    - ~~`endGame()`~~
-    - ~~`vote(voter, recipient)` : can only be done if voeter is dead~~
-  - other methods
-    - `randomizePlayerPositions()`
-- Player
-  - command methods
-    - ~~`move(string direction)`~~
-    - ~~`shoot(coordinates)`~~
-    - ~~`upgradeRange()`~~
-    - ~~`giftActionToken(coordinates)`~~
-  - other methods
-    - ~~`hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)~~
-- Database
-  - ~~`createPlayer()`~~
-  - ~~`getPlayer()`~~
-  - ~~`getPlayers()`~~
-  - ~~`updatePlayer()`~~
-  - ~~`updatePlayers()`~~
-  - ~~`updateVote()`~~
-  - ~~`getVotes()`~~
-  - ~~`emptyVotes()`~~
-  - ~~`getGameStarted()`~~
-  - ~~`setGameStarted()`~~
-  - ~~`getGameEnded()`~~
-  - ~~`setGameEnded()`~~
-  - ~~`resetGame()`~~
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables

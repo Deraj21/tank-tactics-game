@@ -215,7 +215,7 @@ class Player {
      * @param {string} voterUname - username of Jurer
      * @param {string} recipientUname - username that the Jurer submitted
      */
-     vote(voterUname, recipientUname){
+    vote(voterUname, recipientUname){
         let voter = this.db.getPlayer(voterUname)
         let recipient = this.db.getPlayer(recipientUname)
 
