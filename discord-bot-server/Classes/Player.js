@@ -10,8 +10,9 @@ class Player {
     }
 
     /**
+     * move - move player in cardinal direction by one
+     * @param {string} uname - username of player doing the action
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'
-     * @param {Array} playersPos - array player positions
      */
     move(uname, dir){
         let player = { ...this.db.getPlayer(uname) }
@@ -90,7 +91,13 @@ class Player {
         })
     }
 
-    shoot(uname, coords){
+    /**
+     * shoot - player shoots at coordinate on board
+     * @param {string} uname - username of player doing the action
+     * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
+     * @param {boolean} isShooting - is player shooting or gifting an action point
+     */
+    shoot(uname, coords, isShooting = true){
         let player = this.db.getPlayer(uname)
         let { range, position, actionTokens } = player
         let { r, c } = position
@@ -134,7 +141,11 @@ class Player {
         }
         
         // have player take damage
-        this.takeDamage(hitPlayer)
+        if (isShooting){
+            this.takeDamage(hitPlayer)
+        } else {
+            this.receiveToken(hitPlayer)
+        }
 
         // remove action token
         player.actionTokens--
@@ -142,19 +153,52 @@ class Player {
         this.db.updatePlayer(uname, player)
     }
 
+    /**
+     * takeDamage - take 1 health from player, and check if dead
+     * @param {string} uname - username of player taking damage
+     */
     takeDamage(uname){
         let player = this.db.getPlayer(uname)
         player.health--
-
+        
         // check death
         if (player.health <= 0){
             player.isDead = true
             player.position = { r: -1, c: -1 }
         }
+        
+        this.db.updatePlayer(uname, {
+            health: player.health,
+            isDead: player.isDead,
+            position: { ...player.position }
+        })
+    }
 
-        this.db.updatePlayer(uname, player)
+    /**
+     * giftActionToken - gift another player an action token
+     * @param {string} uname - username of player giving the token
+     * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
+     */
+    giftActionToken(uname, coords){
+        this.shoot(uname, coords, false)
+    }
+
+    /**
+     * recieveToken - give player an action token
+     * @param {string} uname - username of player recieving token
+     */
+    receiveToken(uname){
+        let player = this.db.getPlayer(uname)
+        player.actionTokens++
+        this.db.updatePlayer(uname, {
+            actionTokens: player.actionTokens
+        })
     }
     
+    /**
+     * upgradeRange - up the player's range by 1
+     * @param {string} uname - username of player doing the action
+     */
     upgradeRange(uname){
         let player = this.db.getPlayer(uname)
         if (player.actionTokens < 1){
@@ -166,7 +210,39 @@ class Player {
 
         this.db.updatePlayer(uname, player)
     }
+    
+    /**
+     * @param {string} voterUname - username of Jurer
+     * @param {string} recipientUname - username that the Jurer submitted
+     */
+     vote(voterUname, recipientUname){
+        let voter = this.db.getPlayer(voterUname)
+        let recipient = this.db.getPlayer(recipientUname)
 
+        // make sure players exist
+        if (voter === null || recipient === null){
+            console.log(Error['007'])
+            return '007'
+        }
+
+        // make sure voter is dead
+        if (!voter.isDead){
+            console.log(Error['005'])
+            return '005'
+        }
+        // make sure recipient is not dead
+        if (recipient.isDead){
+            console.log(Error['006'])
+            return '006'
+        }
+
+        this.db.updateVote(voterUname, recipientUname)
+    }
+    
+    /**
+     * get all player positions from db
+     * @returns {Object} - player positions
+     */
     getPlayerPositions(){
         return this.db.getPlayers().map(p => {
             return {
@@ -176,6 +252,11 @@ class Player {
         })
     }
 
+    /**
+     * printInfo - prints out a players info
+     * @param {Object} player - player info that will be printed
+     * @param {boolean} long - print in long form?
+     */
     printInfo(player, long = false){
         let { name, health, actionTokens, range, position, color } = player
         let { r, c } = position
@@ -195,6 +276,10 @@ class Player {
         }
     }
 
+    /**
+     * printPlayers - prints info of multiple players
+     * @param  {...string} unames - array of player names to print; if empty, will print all players
+     */
     printPlayers(...unames){
         if (unames.length === 0){
             // print all

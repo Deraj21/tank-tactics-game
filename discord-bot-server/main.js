@@ -9,25 +9,30 @@ const   Game = require('./Classes/Game'),
         addie = "addie",
         tim = "tim"
 
+/**
+ * Call callback function <cb> <x> times
+ * @param {Number} x - how many time you want the callback to run
+ * @param {Function} cb - callback function that you want repeated
+ * @param {...any} params - parameters to be passed to the function
+ */
+const rpt = (x, cb, ...params) => {
+  for (let i = 0; i < x; i++){
+    cb(...params)
+  }
+}
+
 // setup
 game.addPlayer(jared)
 game.addPlayer(rachel)
 game.addPlayer(addie)
 game.addPlayer(tim)
 db.updatePlayer(jared, { position: { r: 4, c: 6 } })
-db.updatePlayer(rachel, { position: { r: 2, c: 3 } })
-db.updatePlayer(addie, { position: { r: 7, c: 5 } })
+db.updatePlayer(rachel, { position: { r: 2, c: 3 }, health: 1 })
+db.updatePlayer(addie, { position: { r: 7, c: 5 }, health: 2 })
 db.updatePlayer(tim, { position: { r: 5, c: 6 } })
 game.giveDailyTokens(5)
-game.printBoard()
-
-player.shoot(tim, 'e6')
-player.shoot(tim, 'e6')
-player.shoot(tim, 'e6')
 
 game.printBoard()
-
-// print
 player.printPlayers()
 
 /*

@@ -45,34 +45,6 @@ class Game {
     }
 
     /**
-     * @param {string} voterUname - username of Jurer
-     * @param {string} recipientUname - username that the Jurer submitted
-     */
-    vote(voterUname, recipientUname){
-        let voter = this.db.getPlayer(voterUname)
-        let recipient = this.db.getPlayer(recipientUname)
-
-        // make sure players exist
-        if (voter === null || recipient === null){
-            console.log(Error['007'])
-            return '007'
-        }
-
-        // make sure voter is dead
-        if (!voter.isDead){
-            console.log(Error['005'])
-            return '005'
-        }
-        // make sure recipient is not dead
-        if (recipient.isDead){
-            console.log(Error['006'])
-            return '006'
-        }
-
-        this.db.updateVote(voterUname, recipientUname)
-    }
-
-    /**
      * @param {string} username - new player's username
      */
     addPlayer(username){
