@@ -1,30 +1,26 @@
 const   Player = require('./Player'),
         Error = require('./ErrorCodes'),
-        Utils = require('./Utilities'),
-        db =    require('./Database')
+        Utils = require('./Utilities')
 
 /**
  * Game
  */
 class Game {
-    constructor(){
-        this.players = []
-        this.votes = {}
-        this.gameStarted = false
-        this.gameEnded = true
+    constructor(db){
+        this.db = db
     }
 
     startGame(){
-        this.gameStarted = true
+        this.db.setGameStarted(true)
     }
 
     endGame(){
-        this.gameEnded = true
+        this.db.setGameEnded(true)
     }
 
     giveDailyTokens(numTokens = 1){
         // tally votes
-        let { votes } = this
+        let votes = this.db.getVotes()
         let tally = {}
         for (let key in votes){
             if (tally[votes[key]]){
@@ -34,25 +30,27 @@ class Game {
             }
         }
         
-        this.players.forEach(player => {
+        this.db.getPlayers().forEach(player => {
             if (!player.isDead){
                 player.actionTokens += numTokens
                 if (tally[player.name] >= 3){
                     player.actionTokens += numTokens
                 }
+                this.db.updatePlayer(player.name, { actionTokens: player.actionTokens })
             }
         })
 
-        // TODO: 'forget' votes (when add database)
+        // 'forget' votes
+        this.db.emptyVotes()
     }
 
     /**
      * @param {string} voterUname - username of Jurer
-     * @param {string} recipientUname - username Jurer submitted
+     * @param {string} recipientUname - username that the Jurer submitted
      */
     vote(voterUname, recipientUname){
-        let voter = this.getPlayer(voterUname)
-        let recipient = this.getPlayer(recipientUname)
+        let voter = this.db.getPlayer(voterUname)
+        let recipient = this.db.getPlayer(recipientUname)
 
         // make sure players exist
         if (voter === null || recipient === null){
@@ -71,43 +69,19 @@ class Game {
             return '006'
         }
 
-        this.votes[voterUname] = recipientUname
-        console.log(voter.name, this.votes[voterUname])
+        this.db.updateVote(voterUname, recipientUname)
     }
 
     /**
      * @param {string} username - new player's username
      */
     addPlayer(username){
-        if (this.gameStarted){
+        if (this.db.getGameStarted()){
             console.error('ERROR: ' + Error['004'])
             return '004'
         }
 
-        let newPlayer = new Player(username, this.getPlayerPositions.bind(this))
-        this.players.push(newPlayer)
-        return newPlayer
-    }
-
-    getPlayer(username){
-        return this.players.find(player => player.name === username) || null
-    }
-
-    getPlayerPositions(){
-        return this.players.map(p => { return {...p.position} })
-    }
-
-    printPlayers(...unames){
-        if (unames.length === 0){
-            // print all
-            this.players.forEach(p => {
-                p.printInfo()
-            })
-        } else {
-            unames.forEach(uname => {
-                this.getPlayer(uname).printInfo()
-            })
-        }
+        this.db.createPlayer(username)
     }
 
     printBoard(){
@@ -122,7 +96,11 @@ class Game {
             board.push(row)
         }
         // place 'tanks'
-        this.players.forEach(p => {
+        this.db.getPlayers().forEach(p => {
+            if (p.isDead){
+                return
+            }
+
             let { r, c } = p.position
             board[r][c] = p.name[0]
         })

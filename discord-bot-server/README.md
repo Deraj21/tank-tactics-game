@@ -78,17 +78,19 @@
   - other methods
     - ~~`hashColor()` : hashes username to cread unique color for each tank (I *think* it's on replit)~~
 - Database
-  - createPlayer
-  - getPlayer
-  - getPlayers
-  - updatePlayer
-  - updateVote
-  - getVotes
-  - getGameStarted
-  - setGameStarted
-  - getGameEnded
-  - setGameEnded
-  - resetGame
+  - ~~createPlayer~~
+  - ~~getPlayer~~
+  - ~~getPlayers~~
+  - ~~updatePlayer~~
+  - ~~updatePlayers~~
+  - ~~updateVote~~
+  - ~~getVotes~~
+  - ~~emptyVotes~~
+  - ~~getGameStarted~~
+  - ~~setGameStarted~~
+  - ~~getGameEnded~~
+  - ~~setGameEnded~~
+  - ~~resetGame~~
 ### Create Node server events
 - basically just one: readMessage
   - if message contains `$<command_string>`, then parse the incoming variables

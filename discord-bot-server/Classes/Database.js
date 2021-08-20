@@ -1,19 +1,16 @@
 const   Utils = require('./Utilities'),
         Error = require('./ErrorCodes')
-
-// initial data
-let players = [],
-    votes = {},
-    gameStarted = false,
-    gameEnded = false
-
+    
 class Database {
     constructor(){
-        
+        this.players = [],
+        this.votes = {},
+        this.gameStarted = false,
+        this.gameEnded = false
     }
-    
+
     createPlayer(username){
-        players.push({
+        let newPlayer = {
             name: username,
             health: 3,
             actionTokens: 0,
@@ -21,65 +18,74 @@ class Database {
             position: { r: 0, c: 0 },
             color: Utils.hashRGB(username),
             isDead: false
-        })
+        }
+        this.players.push(newPlayer)
         
     }
 
     getPlayer(username){
-        return { ...players.find(p => p.name === username) }
+        let p = this.players.find(p => p.name === username)
+        if (p !== null){
+            // immutable data
+            return Object.assign({}, p, { position: { ...p.position } })
+        } else {
+            return null
+        }
     }
 
     getPlayers(){
-        return { ...players }
+        // immutible data
+        return this.players.map(p => {
+            return Object.assign({}, p, { position: { ...p.position } })
+        })
     }
 
     updatePlayer(username, payload){
-        player = players.find(p => p.name === username)
-        player = Object.assign({}, player, payload)
-        return { ...player }
+        let i = this.players.findIndex(p => p.name === username)
+        let player = { ...this.players[i] }
+        this.players[i] = Object.assign({}, player, payload)
     }
 
     updatePlayers(playerData){
-        players = [ ...playerData ]
+        this.players = [ ...playerData ]
     }
 
     updateVote(voter, recipient){
-        votes[voter] = recipient
+        this.votes[voter] = recipient
     }
 
     getVotes(){
-        return { ...votes }
+        return { ...this.votes }
     }
 
     emptyVotes(){
-        for (let key in votes){
-            delete votes[key]
+        for (let key in this.votes){
+            delete this.votes[key]
         }
     }
 
     getGameStarted(){
-        return gameStarted
+        return this.gameStarted
     }
 
     setGameStarted(bool){
-        gameStarted = bool
+        this.gameStarted = bool
     }
 
     getGameEnded(){
-        return gameEnded
+        return this.gameEnded
     }
 
     setGameEnded(bool){
-        gameEnded = bool
+        this.gameEnded = bool
     }
 
     resetGame(){
-        players.length = 0
-        this.emptyVotes
-        gameStarted = false
-        gameEnded = false
+        this.players.length = 0
+        this.emptyVotes()
+        this.gameStarted = false
+        this.gameEnded = false
     }
-
 }
 
 module.exports = Database

@@ -1,26 +1,47 @@
-const Game = require('./Classes/Game')
-
-let game = new Game()
+const   Game = require('./Classes/Game'),
+        Player = require('./Classes/Player'),
+        Database = require('./Classes/Database'),
+        db = new Database(),
+        game = new Game(db),
+        player = new Player(db),
+        jared = "jared",
+        rachel = "rachel",
+        addie = "addie",
+        tim = "tim"
 
 // setup
-const   jared = game.addPlayer('jared'),
-        rachel = game.addPlayer('rachel'),
-        addie = game.addPlayer('addie'),
-        tim = game.addPlayer('tim')
-
-jared.position =    { r: 3, c: 6 }
-rachel.position =   { r: 2, c: 3 }
-addie.position =    { r: 7, c: 5 }
-tim.position =      { r: 5, c: 6 }
+game.addPlayer(jared)
+game.addPlayer(rachel)
+game.addPlayer(addie)
+game.addPlayer(tim)
+db.updatePlayer(jared, { position: { r: 4, c: 6 } })
+db.updatePlayer(rachel, { position: { r: 2, c: 3 } })
+db.updatePlayer(addie, { position: { r: 7, c: 5 } })
+db.updatePlayer(tim, { position: { r: 5, c: 6 } })
+game.giveDailyTokens(5)
 game.printBoard()
 
-// tokens
-game.giveDailyTokens(5)
+player.shoot(tim, 'e6')
+player.shoot(tim, 'e6')
+player.shoot(tim, 'e6')
 
-// moving
-
-// shooting
-tim.shoot('d9')
+game.printBoard()
 
 // print
-game.printPlayers()
+player.printPlayers()
+
+/*
+
+  0 1 2 3 4 5 6 7 8 9
+A . . . . . . . . . .
+B . . . . . . . . . .
+C . . . r . . . . . .
+D . . . . . . . . . .
+E . . . . . . j . . .
+F . . . . . . t . . .
+G . . . . . . . . . .
+H . . . . . a . . . .
+I . . . . . . . . . .
+J . . . . . . . . . .
+
+*/

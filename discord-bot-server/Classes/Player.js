@@ -1,38 +1,26 @@
 const   Utils = require('./Utilities'),
-        Error = require('./ErrorCodes'),
-        db =    require('./Database')
+        Error = require('./ErrorCodes')
 
 /**
  * Player
  */
 class Player {
-    /**
-     * 
-     * @param {string} username - player username
-     */
-    constructor(username, getPlayerPositions){
-        this.name = username
-        this.health = 3
-        this.actionTokens = 0
-        this.range = 2
-        this.position = { r: 0, c: 0 }
-        this.color = Utils.hashRGB(username)
-        this.isDead = false
-
-        this.getPlayerPositions = getPlayerPositions
+    constructor(db){
+        this.db = db
     }
 
     /**
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'
      * @param {Array} playersPos - array player positions
      */
-    move(dir){
-        if (this.actionTokens === 0){
+    move(uname, dir){
+        let player = { ...this.db.getPlayer(uname) }
+
+        if (player.actionTokens === 0){
             console.log(Error['003'])
             return '003'
         }
 
-        let oldPos = { ...this.position }
         const playersPos = this.getPlayerPositions()
 
         // parse string
@@ -46,16 +34,16 @@ class Player {
         // 1st coord
         switch (result[0]){
             case 'N':
-                this.position.r--
+                player.position.r--
                 break;
             case 'S':
-                this.position.r++
+                player.position.r++
                 break;
             case 'W':
-                this.position.c--
+                player.position.c--
                 break;
             case 'E':
-                this.position.c++
+                player.position.c++
                 break;
             default:
                 break;
@@ -64,45 +52,50 @@ class Player {
         // 2nd coord
         switch (result[1]){
             case 'W':
-                this.position.c--
+                player.position.c--
                 break;
             case 'E':
-                this.position.c++
+                player.position.c++
                 break;
             default:
                 break;
         }
 
         // check out of bounds
-        if (this.position.r < 0 || this.position.r > Utils.NUM_ROWS-1 || this.position.c < 0 || this.position.c > Utils.NUM_COLS-1){
-            this.position = { ...oldPos }
+        if (player.position.r < 0 || player.position.r > Utils.NUM_ROWS-1 || player.position.c < 0 || player.position.c > Utils.NUM_COLS-1){
             console.log(Error['001'])
             return '001'
         }
 
         // check ran into other players
         let ranIntoPlayer = false
-        playersPos.forEach(pos => {
-            if (pos.r === this.position.r && pos.c === this.position.c){
+        playersPos.forEach(playerPos => {
+            let pos = playerPos.position
+            if (playerPos.name === player.name){
+                return
+            } else if (pos.r === player.position.r && pos.c === player.position.c){
                 ranIntoPlayer = true
                 return
             }
         })
         if (ranIntoPlayer){
-            this.position = { ...oldPos }
             console.log(Error['008'])
             return '008'
         }
-        
-        this.actionTokens--
-        
+
+        player.actionTokens--
+        this.db.updatePlayer(uname, {
+            actionTokens: player.actionTokens,
+            position: { ...player.position }
+        })
     }
 
-    shoot(coords){
-        let { range } = this
-        let { r, c } = this.position
+    shoot(uname, coords){
+        let player = this.db.getPlayer(uname)
+        let { range, position, actionTokens } = player
+        let { r, c } = position
 
-        if (this.actionTokens < 1){
+        if (actionTokens < 1){
             console.log(Error['003'])
             return '003'
         }
@@ -127,25 +120,64 @@ class Player {
             return '010'
         }
 
-        // check player at coordinates '011'
-
+        // check player at coordinates - '011'
+        let playerPositions = this.getPlayerPositions()
+        let hitPlayer = ""
+        playerPositions.forEach(pos => {
+            if (pos.position.r === row && pos.position.c === col){
+                hitPlayer = pos.name
+            }
+        })
+        if (!hitPlayer){
+            console.log(Error['011'])
+            return '011'
+        }
+        
         // have player take damage
+        this.takeDamage(hitPlayer)
 
         // remove action token
-        this.actionTokens--
+        player.actionTokens--
+
+        this.db.updatePlayer(uname, player)
+    }
+
+    takeDamage(uname){
+        let player = this.db.getPlayer(uname)
+        player.health--
+
+        // check death
+        if (player.health <= 0){
+            player.isDead = true
+            player.position = { r: -1, c: -1 }
+        }
+
+        this.db.updatePlayer(uname, player)
     }
     
-    upgradeRange(){
-        if (this.actionTokens < 1){
+    upgradeRange(uname){
+        let player = this.db.getPlayer(uname)
+        if (player.actionTokens < 1){
             console.log(Error['003'])
             return '003'
         }
-        this.range++
-        this.actionTokens--
+        player.range++
+        player.actionTokens--
+
+        this.db.updatePlayer(uname, player)
     }
 
-    printInfo(long = false){
-        let { name, health, actionTokens, range, position, color } = this
+    getPlayerPositions(){
+        return this.db.getPlayers().map(p => {
+            return {
+                name: p.name,
+                position: p.position
+            }
+        })
+    }
+
+    printInfo(player, long = false){
+        let { name, health, actionTokens, range, position, color } = player
         let { r, c } = position
         if (long){
             console.log(
@@ -160,6 +192,19 @@ class Player {
             console.log(
                 `${name}: ${health}hp ${range}r ${actionTokens}at`
             )
+        }
+    }
+
+    printPlayers(...unames){
+        if (unames.length === 0){
+            // print all
+            this.db.getPlayers().forEach(p => {
+                this.printInfo(p)
+            })
+        } else {
+            unames.forEach(uname => {
+                this.printInfo( this.db.getPlayer(uname) )
+            })
         }
     }
 }
