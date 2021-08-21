@@ -3,9 +3,9 @@
   - [MVP](#mvp)
   - [Post-mvp](#post-mvp)
 - [Questions](#questions)
-- [Replit Todo](#replit-todo)
-  - [Create Node server events](#create-node-server-events)
-  - [Create database](#create-database)
+- [TODO](#todo)
+  - [Node server Todo](#node-server-todo)
+  - [Create Replit database](#create-replit-database)
   - [Add post-mvp commands](#add-post-mvp-commands)
 
 ---
@@ -46,17 +46,27 @@
   - **Discord bot creates and posts images**
     - PROS: I can make it very pretty & readable; not need to leave Discord to view board
     - CONS: *not* low effort; I'm not even sure if it's possible with the tools I have
+- How do I properly test this game?
 
 ---
 
-## Replit Todo
-### Create Node server events
-- basically just one: readMessage
-  - if message contains `$<command_string>`, then parse the incoming variables
-    - if variables can't be parse, respond with error message
-    - else, call related function with parsed variables
-  - else do nothing
-### Create database
+## TODO
+### Node server Todo
+- ~~parseCommand function~~
+- Admin:
+  - give-tokens
+  - start-game
+  - reset-game
+  - get-game-data
+- Players:
+  - join
+  - move
+  - shoot
+  - upgrade-range
+  - gift-action-token
+  - vote
+- figure out how to show all game data at once with just ascii
+### Create Replit database
 - up to this point, everything is done with dummy un-persisted data
 - so, create db, and start writing data
 ### Add post-mvp commands

@@ -44,13 +44,14 @@ class Game {
         this.db.emptyVotes()
     }
 
-    printBoard(){
+    printBoard(small = false){
         // create board
         let board = []
+        let healths = {}
         for (let r = 0; r < Utils.NUM_ROWS; r++){
             let row = []
             for (let c = 0; c < Utils.NUM_COLS; c++){
-                row.push('.')
+                row.push(small ? '.' : '   ')
             }
 
             board.push(row)
@@ -62,19 +63,39 @@ class Game {
             }
 
             let { r, c } = p.position
-            board[r][c] = p.name[0]
+            board[r][c] = small ? p.name[0] : p.shortName
+            if (!small) {
+                healths[p.shortName] = p.health
+            }
         })
 
-        // get ready to print
-        let text = ' '
+        // column labels
+        let text = small ? '` ' : '` '
         for (let i = 0; i < Utils.NUM_COLS; i++){
-            text += ` ${i}`
+            text += small ? ` ${i}` : `   ${i}`
         }
-        text += '\n'
+        text += '`\n'
+        if (!small){
+            text += "`  " + " _ _".repeat(Utils.NUM_COLS) + "`\n"
+        }
+
+        // rows
         board.forEach((row, r) => {
             text += '`'
             text += Utils.ROW_NAMES[r] + ' '
-            text += row.join(' ') + '`\n'
+            if (small){
+                text += row.join(' ') + '`\n'
+            } else {
+                text += '|' + row.join('|') + "|`\n"
+                text += "`  |"
+                row.forEach(c => {
+                    if (r === 0){
+                        console.log(r, row, c)
+                    }
+                    text += "_" + (healths[c] ? healths[c] : " ") + "_|"
+                })
+                text += "`\n"
+            }
         })
 
         return text
@@ -82,3 +103,28 @@ class Game {
 }
 
 module.exports = Game
+/*
+    0   1   2   3   4   5   6   7   8   9
+   _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+A |der|   |   |   |   |   |   |   |   |   |
+  |_1_|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+B |   |   |   |   |   |   |   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+C |   |   |   |   |   |pea|   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_1_|_ _|_ _|_ _|_ _|
+C |   |aby|   |   |   |   |   |   |   |   |
+  |_ _|_2_|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+E |   |   |doo|   |   |   |   |   |   |   |
+  |_ _|_ _|_3_|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+F |   |   |   |   |   |   |   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+G |   |   |   |   |   |   |   |som|   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_1_|_ _|_ _|
+H |   |   |   |   |   |   |   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+I |   |   |   |   |   |   |   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+J |   |   |   |   |   |   |   |   |   |   |
+  |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+
+*/

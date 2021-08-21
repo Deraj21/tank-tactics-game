@@ -20,21 +20,21 @@ const   db = new Database()
 
 
 function parseCommand(msg){
-    let string = msg.content
-    let split = string.split(' ')
+    let split = msg.content.split(' ')
     let command = split.shift().toLowerCase()
+    let boardUpdated = false
 
     switch(command){
         // Admin
         case "$give-tokens":
-            msg.reply("giving daily tokens")
             game.giveDailyTokens()
+            msg.reply("daily tokens given out")
+            // TODO: show vote tally (not who voted but whom recieved the votes)
             break;
         case "$start-game":
             game.startGame()
-            msg.reply(
-                game.printBoard()
-            )
+            boardUpdated = true;
+
             break;
         case "$reset-game":
             msg.reply("reseting game")
@@ -48,27 +48,28 @@ function parseCommand(msg){
 
         // Players
         case "$join":
-            msg.reply(`player ${msg.author.username} is joining the game`)
             player.join(msg.author.username)
+            msg.reply(`player "${msg.author.username}" added the game`)
             break;
         case "$move":
             let result = player.move(username, ...split)
             if (Utils.catchError(result)){
                 return result
             }
-            msg.reply( game.printBoard() )
+            boardUpdated = true
+            
             break;
         case "$shoot":
             // player.shoot(username, ...split)
-            msg.reply(`player ${msg.author.username} is shooting ${split.join(' ')}`)
+            boardUpdated = true
             break;
         case "$upgrade-range":
             // player.upgradeRange(username)
-            msg.reply(`upgrading ${msg.author.username}'s range'`)
+            boardUpdated = true
             break;
         case "$gift-action-token":
             // player.giftActionToken(username, ...split)
-            msg.reply(`player ${msg.author.username} gifting token to ${split.join(' ')}`)
+            boardUpdated = true
             break;
         case "$vote":
             // player.vote(username, ...split)
@@ -76,9 +77,19 @@ function parseCommand(msg){
             msg.author.send('You can start dming me now')
             break;
         default:
-            msg.reply("No such command found.")
-            msg.delete()
+            msg.reply("`" + msg.content + "` is not a valid command.")
+                .then(res => {
+                    console.log(res)
+                    // msg.delete()
+                })
+                .catch(err => {
+                    console.log(err)
+                })
             break;
+    }
+
+    if (boardUpdated){
+        msg.reply( game.printBoard() )
     }
 }
 

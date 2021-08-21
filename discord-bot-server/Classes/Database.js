@@ -11,6 +11,7 @@ class Database {
     createPlayer(username){
         let newPlayer = {
             name: username,
+            shortName: username.split('').splice(0, 3).join(''),
             health: 3,
             actionTokens: 0,
             range: 2,

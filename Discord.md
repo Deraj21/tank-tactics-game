@@ -108,7 +108,7 @@ Every command is prefaced with the dollar symbol (`$`). Some commands need more 
 - `$get-players`: gets list of player usernames
 - `$get-votes`: gets list of votes -->
 ### All Players
-- `$join`: join the game; only works if game hasn't started
+- `$join <3_letter_abbr>`: join the game using a 3-letter abbreviation of your name; this name is only used when displaying your tank on the board. If left blank, the 1st 3 letters of your username will be used.
 - `$move <cardinal_direction>`: move tank 1 space in `cardinal_direction`; 
     - *examples: "`$move nw`" , "`$move E`"*
 - `$shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
