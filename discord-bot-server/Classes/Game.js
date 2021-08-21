@@ -14,8 +14,8 @@ class Game {
         this.db.setGameStarted(true)
     }
 
-    endGame(){
-        this.db.setGameEnded(true)
+    resetGame(){
+        this.db.resetGame()
     }
 
     giveDailyTokens(numTokens = 1){
@@ -42,18 +42,6 @@ class Game {
 
         // 'forget' votes
         this.db.emptyVotes()
-    }
-
-    /**
-     * @param {string} username - new player's username
-     */
-    addPlayer(username){
-        if (this.db.getGameStarted()){
-            console.error('ERROR: ' + Error['004'])
-            return '004'
-        }
-
-        this.db.createPlayer(username)
     }
 
     printBoard(){
@@ -84,11 +72,12 @@ class Game {
         }
         text += '\n'
         board.forEach((row, r) => {
+            text += '`'
             text += Utils.ROW_NAMES[r] + ' '
-            text += row.join(' ') + '\n'
+            text += row.join(' ') + '`\n'
         })
 
-        console.log(text)
+        return text
     }
 }
 

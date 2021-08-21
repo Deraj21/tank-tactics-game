@@ -10,6 +10,18 @@ class Player {
     }
 
     /**
+     * @param {string} uname - new player's username
+     */
+    join(uname){
+        if (this.db.getGameStarted()){
+            console.error('ERROR: ' + Error['004'])
+            return '004'
+        }
+
+        this.db.createPlayer(uname)
+    }
+
+    /**
      * move - move player in cardinal direction by one
      * @param {string} uname - username of player doing the action
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'

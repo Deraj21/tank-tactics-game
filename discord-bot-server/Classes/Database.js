@@ -5,8 +5,7 @@ class Database {
     constructor(){
         this.players = [],
         this.votes = {},
-        this.gameStarted = false,
-        this.gameEnded = false
+        this.gameStarted = false
     }
 
     createPlayer(username){
@@ -72,19 +71,10 @@ class Database {
         this.gameStarted = bool
     }
 
-    getGameEnded(){
-        return this.gameEnded
-    }
-
-    setGameEnded(bool){
-        this.gameEnded = bool
-    }
-
     resetGame(){
         this.players.length = 0
         this.emptyVotes()
         this.gameStarted = false
-        this.gameEnded = false
     }
 }
 

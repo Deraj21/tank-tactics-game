@@ -32,5 +32,12 @@ module.exports = {
         let b = hexVals[hex[4]] * 16 + hexVals[hex[5]];
 
         return `RGB(${r},${g},${b})`;
+    },
+
+    catchError: function(str) {
+        if (typeof str == "string" && str.match(/\d{3}/)){
+            return str
+        }
+        return false
     }
 }
