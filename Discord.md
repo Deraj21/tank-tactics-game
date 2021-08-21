@@ -1,6 +1,7 @@
 # Discord <!-- omit in toc -->
 ### Contents
 - [Server Rules](#server-rules)
+- [Channels](#channels)
 - [What is Tank Tactics?](#what-is-tank-tactics)
   - [Where did Tank Tactics come from?](#where-did-tank-tactics-come-from)
 - [Game Rules & how to play](#game-rules--how-to-play)
@@ -12,7 +13,7 @@
 - [List of Commands](#list-of-commands)
   - [Admin Only](#admin-only)
   - [All Players](#all-players)
-  - [Jurers (dead players)](#jurers-dead-players)
+  - [Jurors (dead players)](#jurors-dead-players)
 
 ---
 
@@ -23,10 +24,20 @@
 
 ---
 
+## Channels
+**how-to-play**: for learning the rules of the game, and how to call out moves
+
+**game-discussion**: in this channel, we discuss anything about the game.
+
+**call-out-moves**: this channel is where all actions are taken; only commands to the bot should be messaged to this channel. General discussion goes in *game-discussion*; A pinned comment can be also found here with a command cheat-sheet.
+
+
+---
+
 ## What is Tank Tactics?
 Tank Tactics is a game about social manipulation. Creating plans, forming factions and alliances, betraying those alliances for personal gain; that is the name of the game. Well, "Tank Tactics" is, but you get my point.
 
-Because each individual player only has power to do one action a day, to effectuate much, players need to form alliances and share actions. This makes it so the majority of the game is played talking to each other, rather than in taking actions. Hense, playing the game in Discord makes a lot of sense.
+Because each player only has power to do one action a day, players need to form alliances and share actions to make any real changes. This means that the majority of the game is spent talking to each other, rather than in taking actions. Hence, playing the game in Discord makes a lot of sense.
 
 ### Where did Tank Tactics come from?
 I did not come up with the idea for this game. It is a game concept that Halfbrick Studios starting working on. They are best known for the mobile games, *Jetpack Joyride*, and *Fruit Ninja*, but this game, *Tank Tactics*, started it's life as a physical playtest on a whiteboard amongst their staff. They ended up scrapping the project because of the situation it created at their workplace, being a game about manipulation and all.
@@ -47,12 +58,12 @@ It's actaully a really fascinating story, and inspired me to create a discord-bo
   - 1 action token
   - A range of 2
 ### Playing the Game
-- To perform actions, a player needs to expend `action tokens`; they can be used to move, shoot, gift tokens, or upgrade a player's range.
+- To perform actions, a player needs to expend `action tokens`; they can be used to move, shoot, or upgrade a player's range.
 - **Play is live**, meaning there are no turns; players take actions whenever they please. Players can also take as many actions as they want, so long as they have sufficient tokens.
 - At the begining of each day, each player is given an additional action token.
 - The last player standing wins the game.
 ### Actions
-- Players take actions useing `commands` recognized by the `TankTacticsBot`. [more](#list-of-commands) on that below
+- Players take actions using `commands` recognized by the `TankTacticsBot`. [more](#list-of-commands) on that below
 - Players can spend 1 action token to do one of the following:
   - **Move** one square adjacent or diagonal to their current position
   - **Shoot** another player within their range*; shot players take -1 to their health; players are not able to heal
@@ -71,7 +82,9 @@ It's actaully a really fascinating story, and inspired me to create a discord-bo
 ## How to call out moves
 All commands are typed in the `call-out-moves` channel, or in the case of voting, they can be DM-ed directly to the bot as well.
 
-Every command is prefaced with the dollar symbol (`$`). Some commands need more information for the bot to know what to do. In the List of Commands below, these will have the name of the needed info inside `<` `>` symbols.
+Every command is prefaced with the dollar symbol (`$`). Some commands need more information for the bot to know what to do. In the List of Commands below, these will have the name of the needed info inside `<` `>` symbols. You don't need to type the `<` or `>` when giving the info, nor do you need to worry about capitalization when typing commands.
+
+*Examples: "`$joiN`" , "`$Move Nw`" , "`$gift-action-token f7`" are all valid commnands*
 
 ---
 
@@ -95,13 +108,13 @@ Every command is prefaced with the dollar symbol (`$`). Some commands need more 
 - `$get-players`: gets list of player usernames
 - `$get-votes`: gets list of votes -->
 ### All Players
-- `$move <cardinal_direction>`: move tank 1 space in `cardinal_direction`; 
-    - *examples: `$move Nw` , `$move E`*
-- `$shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
-    - *examples: `$shoot c4` , `$shoot H0`*
-- `$upgrade-range`: player adds 1 to their range
-- `$gift-action-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
 - `$join`: join the game; only works if game hasn't started
-### Jurers (dead players)
+- `$move <cardinal_direction>`: move tank 1 space in `cardinal_direction`; 
+    - *examples: "`$move nw`" , "`$move E`"*
+- `$shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
+    - *examples: "`$shoot c4`" , "`$shoot H0`"*
+- `$gift-action-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
+- `$upgrade-range`: player adds 1 to their range
+### Jurors (dead players)
 - `$vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the daily action tokens are given out
-    - *example: `$vote deraj21`*
+    - *example: "`$vote deraj21`"*
