@@ -1,8 +1,9 @@
 # Discord <!-- omit in toc -->
 ### Contents
 - [Server Rules](#server-rules)
+- [What is Tank Tactics?](#what-is-tank-tactics)
+  - [Where did Tank Tactics come from?](#where-did-tank-tactics-come-from)
 - [Game Rules & how to play](#game-rules--how-to-play)
-  - [Disclaimer](#disclaimer)
   - [Setup](#setup)
   - [Playing the Game](#playing-the-game)
   - [Actions](#actions)
@@ -10,13 +11,8 @@
 - [How to call out moves](#how-to-call-out-moves)
 - [List of Commands](#list-of-commands)
   - [Admin Only](#admin-only)
-  - [Admin post-MVP](#admin-post-mvp)
   - [All Players](#all-players)
-  - [Jurer (dead player)](#jurer-dead-player)
-
-### todo
-- create game rules pinned comment
-- create how to write commands pinned post
+  - [Jurers (dead players)](#jurers-dead-players)
 
 ---
 
@@ -27,16 +23,22 @@
 
 ---
 
+## What is Tank Tactics?
+Tank Tactics is a game about social manipulation. Creating plans, forming factions and alliances, betraying those alliances for personal gain; that is the name of the game. Well, "Tank Tactics" is, but you get my point.
+
+Because each individual player only has power to do one action a day, to effectuate much, players need to form alliances and share actions. This makes it so the majority of the game is played talking to each other, rather than in taking actions. Hense, playing the game in Discord makes a lot of sense.
+
+### Where did Tank Tactics come from?
+I did not come up with the idea for this game. It is a game concept that Halfbrick Studios starting working on. They are best known for the mobile games, *Jetpack Joyride*, and *Fruit Ninja*, but this game, *Tank Tactics*, started it's life as a physical playtest on a whiteboard amongst their staff. They ended up scrapping the project because of the situation it created at their workplace, being a game about manipulation and all.
+
+It's actaully a really fascinating story, and inspired me to create a discord-bot way to play the game. If you want to learn more about the game's development, and ultimate banning over at Halfbrick Studios, here are some links:
+- [The Game Prototype That Had to Be Banned by Its Own Studio](https://www.youtube.com/watch?v=aOYbR-Q_4Hs&t=615s&ab_channel=PeopleMakeGames) - Youtube video, *16 min*
+- [The Prototype that was Banned from Halfbrick](https://www.gdcvault.com/play/1017744/The-Prototype-that-was-Banned) - GDC talk going more in depth, *1 hr*
+- also, if you just [google "halfbrick studios banned game"](https://www.google.com/search?q=halfbrick+studios+banned+game&sxsrf=ALeKk02aFhg8daTwdT740_XwJbHPVU2YPw:1629498523194&source=lnms&sa=X&ved=2ahUKEwjP0ouF08DyAhULIDQIHVIHDFwQ_AUoAHoECAEQAg&biw=1920&bih=937&dpr=1), you'll get lots of results as well
+
+---
+
 ## Game Rules & how to play
-Tank tactics is a game about social manipulation. Creating plans, factions, truces, betraying others; that is the name of the game. Well, "Tank Tactics is", but you ge my point.
-
-### Disclaimer
-I did not come up with the idea for this game. It is a game concept that Halfbrick Games starting working on. They are best known for the mobile games, *Jetpack Joyride*, and *Fruit Ninja*. They ended up scrapping the project because of what happened in their offices when they had employees play-testing the concept.
-
-It's actaully a really fascinating story, and inspired me to create a discord-bot way to play the game. If you want to learn more about it, here are som links:
-- [Youtube video talking about what happened - 16 min](https://www.youtube.com/watch?v=aOYbR-Q_4Hs&t=615s&ab_channel=PeopleMakeGames)
-- [GDC talk from one of the creators going more in-depth - 1 hr]()
-
 ### Setup
 - Use the `$join` command to join the game. Once the game has started, players can no longer join.
 - Each player plays as a tank on a board of squares
@@ -50,30 +52,37 @@ It's actaully a really fascinating story, and inspired me to create a discord-bo
 - At the begining of each day, each player is given an additional action token.
 - The last player standing wins the game.
 ### Actions
+- Players take actions useing `commands` recognized by the `TankTacticsBot`. [more](#list-of-commands) on that below
 - Players can spend 1 action token to do one of the following:
   - **Move** one square adjacent or diagonal to their current position
   - **Shoot** another player within their range*; shot players take -1 to their health; players are not able to heal
   - **Gift** an **Action Token** to another player within their range*; no tokens are lost in this exchange, the giving player loses 1 token, while the recieving player gains 1.
   - **Upgrade** their **Range**; players range goes up by 1
 
-\* if a player has a range of 2, another player is "within range" if they are 2 squares or less away, diagonally or adjacently
+\* _**range**: if a player has a range of 2, another player is "within range" if they are 2 squares or less away, diagonally or adjacently_
+
 ### Death & The Jury
 - Players who are knocked down to 0 health are removed from the board, and can no longer take actions; their action points are lost
 - However, as in the reality TV show [Survivor](https://en.wikipedia.org/wiki/Survivor_(American_TV_series)#Format_and_rules), dead players become part of the `Jury`, and are able to cast votes on other players
 - Players that have 3 or more votes when the daily action tokens are given, receive an additional action token
 
-## How to call out moves
+---
 
+## How to call out moves
+All commands are typed in the `call-out-moves` channel, or in the case of voting, they can be DM-ed directly to the bot as well.
+
+Every command is prefaced with the dollar symbol (`$`). Some commands need more information for the bot to know what to do. In the List of Commands below, these will have the name of the needed info inside `<` `>` symbols.
+
+---
 
 ## List of Commands
-This is a list of command and what they do. All commands are typed in the `call-out-moves` channel, or in the case of voting, they can be DM-ed right to the bot as well. Every command is prefaced with the dollar symbol (`$`).
 ### Admin Only
 - `$give-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
-- `$add-player <user_name>`: add player with `user_name` to the game
+<!-- - `$add-player <user_name>`: add player with `user_name` to the game -->
 - `$start-game`: starts the game; board is displayed
-- `$end-game`: ?(maybe) ends the current game; new game is ready to accept new players
+<!-- - `$end-game`: ends the current game; new game is ready to accept new players -->
 - `$reset-game`: resets the game to default state where settings can be changed, and players can join
-### Admin post-MVP
+<!-- ### Admin post-MVP
 - `$game-setting <setting> <value>`: change game setting to given value.
     - **Settings**
         - board_height - integer
@@ -84,14 +93,15 @@ This is a list of command and what they do. All commands are typed in the `call-
         - starting_range - integer
 - `$remove-player <username>`: removes player with user_name from the game
 - `$get-players`: gets list of player usernames
-- `$get-votes`: gets list of votes
+- `$get-votes`: gets list of votes -->
 ### All Players
-- `$move <cardinal_direction>`: move player 1 space in `cardinal_direction`
-    - *examples: `$move NW` , `$move e`*
-- `$shoot <coords>`: player shoots at `coords` (coords formatted as a single letter A-J followed by a digit 0-9)
+- `$move <cardinal_direction>`: move tank 1 space in `cardinal_direction`; 
+    - *examples: `$move Nw` , `$move E`*
+- `$shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
     - *examples: `$shoot c4` , `$shoot H0`*
 - `$upgrade-range`: player adds 1 to their range
-- `$gift-action-token <coords>`: same as shooting, but player at `coords` gains an action token instead of taking damage
-- `$join`: join the game before it starts
-### Jurer (dead player)
-- `$vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the `$add-tokens` command is used
+- `$gift-action-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
+- `$join`: join the game; only works if game hasn't started
+### Jurers (dead players)
+- `$vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the daily action tokens are given out
+    - *example: `$vote deraj21`*
