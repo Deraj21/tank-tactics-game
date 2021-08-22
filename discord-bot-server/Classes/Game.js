@@ -12,10 +12,37 @@ class Game {
 
     startGame(){
         this.db.setGameStarted(true)
+        this.randomizePlayerPositions()
     }
 
-    resetGame(){
-        this.db.resetGame()
+    resetGame(){ this.db.resetGame() }
+
+    randomFromList(arr){
+        let i = Math.floor( Math.random() * arr.length )
+        return arr.splice(i, 1)[0]
+    }
+
+    randomizePlayerPositions(){
+        // create flat array of all coordinates
+        let coords = []
+        for (let r = 0; r < Utils.NUM_ROWS; r++){
+            for (let c = 0; c < Utils.NUM_COLS; c++){
+                coords.push(r + '-' + c)
+            }
+        }
+
+        // get players
+        let players = this.db.getPlayers().map(player => {
+            // for each player, splice coordinate from the list
+            let coordinates = this.randomFromList(coords).split('-')
+            player.position.r = parseInt(coordinates[0])
+            player.position.c = parseInt(coordinates[1])
+
+            return player
+        })
+
+        // update database
+        this.db.updatePlayers(players)
     }
 
     giveDailyTokens(numTokens = 1){
@@ -89,9 +116,6 @@ class Game {
                 text += '|' + row.join('|') + "|`\n"
                 text += "`  |"
                 row.forEach(c => {
-                    if (r === 0){
-                        console.log(r, row, c)
-                    }
                     text += "_" + (healths[c] ? healths[c] : " ") + "_|"
                 })
                 text += "`\n"

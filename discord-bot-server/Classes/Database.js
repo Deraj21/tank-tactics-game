@@ -6,12 +6,20 @@ class Database {
         this.players = [],
         this.votes = {},
         this.gameStarted = false
+
+        this.addTestData()
     }
 
-    createPlayer(username){
+    addTestData(){
+        this.createPlayer("AbyssalMoth",    "abm")
+        this.createPlayer("D00m Incarnate", "doo")
+        this.createPlayer("PearlHeart",     "prl")
+    }
+
+    createPlayer(username, shortName){
         let newPlayer = {
             name: username,
-            shortName: username.split('').splice(0, 3).join(''),
+            shortName: shortName,
             health: 3,
             actionTokens: 0,
             range: 2,
@@ -76,6 +84,8 @@ class Database {
         this.players.length = 0
         this.emptyVotes()
         this.gameStarted = false
+
+        this.addTestData()
     }
 }
 

@@ -13,9 +13,9 @@
 ## User Requirements
 ### MVP
 - I should get a new action token once per day
-  - Maybe just a bot command that only the admin of the server can use called `$add-tokens`
+  - Maybe just a bot command that only the admin of the server can use called `!add-tokens`
 - I need to call out moves in the call-out-moves channel
-  - commands start with `$`. see [Commands](#commands) for details
+  - commands start with `!`. see [Commands](#commands) for details
 - I need to see an up to date version of the board, with each player and their...
   - Name (identifier)
   - Location,
@@ -30,8 +30,8 @@
 ### Post-mvp
 - give **admin** commands to edit game settings while players are joining; this could be coupled with another command to list all the settings and the appropriate values. (or maybe we maintain this in a pinned comment)
   - settings examples: board_size, starting_health, starting_tokens, daily_token_count, starting_range, etc.
-  - `$game-setting <setting> <value>`
-    - *example: `$game-setting starting_health 2`*
+  - `!game-setting <setting> <value>`
+    - *example: `!game-setting starting_health 2`*
 
 ---
 
@@ -54,12 +54,10 @@
 ### Node server Todo
 - ~~parseCommand function~~
 - Admin:
-  - give-tokens
-  - start-game
-  - reset-game
-  - get-game-data
+  - when adding daily tokens, show voting tallies
 - Players:
-  - join
+  - ~~join~~
+    - ~~add ability to specify 3-letter name~~
   - move
   - shoot
   - upgrade-range

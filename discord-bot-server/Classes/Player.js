@@ -12,13 +12,13 @@ class Player {
     /**
      * @param {string} uname - new player's username
      */
-    join(uname){
+    join(uname, shortName = uname.split('').splice(0, 3).join('')){
         if (this.db.getGameStarted()){
             console.error('ERROR: ' + Error['004'])
             return '004'
         }
 
-        this.db.createPlayer(uname)
+        this.db.createPlayer(uname, shortName)
     }
 
     /**
@@ -270,21 +270,17 @@ class Player {
      * @param {boolean} long - print in long form?
      */
     printInfo(player, long = false){
-        let { name, health, actionTokens, range, position, color } = player
+        let { name, shortName, health, actionTokens, range, position, color } = player
         let { r, c } = position
         if (long){
-            console.log(
-                `name:          ${name}\n` + 
-                `health:        ${health}\n` + 
-                `range:         ${range}\n` + 
-                `actionTokens:  ${actionTokens}\n` + 
-                `position:      [${r}, ${c}]\n` + 
-                `color:         ${color}\n`
-            )
+            return  `-- **${shortName} (${name})** --\n` + 
+                    `health:       ${health}\n` + 
+                    `range:        ${range}\n` + 
+                    `actionTokens: ${actionTokens}\n` + 
+                    `position:     [${r}, ${c}]\n` + 
+                    `color:        ${color}\n`
         } else {
-            console.log(
-                `${name}: ${health}hp ${range}r ${actionTokens}at`
-            )
+            return `**${shortName}** (${name}):   ${health} hp,  ${range} range,  ${actionTokens} tokens\n`
         }
     }
 
@@ -295,13 +291,9 @@ class Player {
     printPlayers(...unames){
         if (unames.length === 0){
             // print all
-            this.db.getPlayers().forEach(p => {
-                this.printInfo(p)
-            })
+            return this.db.getPlayers().map( p => this.printInfo(p) ).join("")
         } else {
-            unames.forEach(uname => {
-                this.printInfo( this.db.getPlayer(uname) )
-            })
+            return unames.map(uname => this.printInfo( this.db.getPlayer(uname) )).join("")
         }
     }
 }
