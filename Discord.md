@@ -90,7 +90,7 @@ Every command is prefaced with an exclamation point (`!`). Some commands need mo
 
 ## List of Commands
 ### Admin Only
-- `!give-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
+- `!daily-tokens`: give each living player a new action token, players with 3 or more votes from the jury get an extra token
 <!-- - `!add-player <user_name>`: add player with `user_name` to the game -->
 - `!start-game`: starts the game; board is displayed
 <!-- - `!end-game`: ends the current game; new game is ready to accept new players -->
@@ -113,7 +113,7 @@ Every command is prefaced with an exclamation point (`!`). Some commands need mo
     - *examples: "`!move nw`" , "`!move E`"*
 - `!shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
     - *examples: "`!shoot c4`" , "`!shoot H0`"*
-- `!gift-action-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
+- `!gift-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
 - `!upgrade-range`: player adds 1 to their range
 ### Jurors (dead players)
 - `!vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the daily action tokens are given out

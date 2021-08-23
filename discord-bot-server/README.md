@@ -58,12 +58,14 @@
 - Players:
   - ~~join~~
     - ~~add ability to specify 3-letter name~~
-  - move
-  - shoot
-  - upgrade-range
-  - gift-action-token
+  - ~~move~~
+  - ~~shoot~~
+    - ~~errors showing when... out of range, shooting empty space, out of tokens~~
+  - ~~upgrade-range~~
+  - ~~gift-action-token~~
   - vote
-- figure out how to show all game data at once with just ascii
+- ~~figure out how to show all game data at once with just ascii~~
+- try to make board look readable on phones (maybe try using 3 tic marks instead of just one )
 ### Create Replit database
 - up to this point, everything is done with dummy un-persisted data
 - so, create db, and start writing data

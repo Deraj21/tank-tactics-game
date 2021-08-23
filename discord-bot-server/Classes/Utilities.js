@@ -39,5 +39,22 @@ module.exports = {
             return str
         }
         return false
+    },
+
+    randomFromList(arr){
+        let i = Math.floor( Math.random() * arr.length )
+        return arr.splice(i, 1)[0]
+    },
+
+    getDeathMessage() {
+        return this.randomFromList([
+            "Is no longer with us.",
+            "Has gone the way of all the earth.",
+            "Un-alived.",
+            "Kicked the bucket.",
+            "Just think of it as they're being let go.",
+            "Their life is going in a different direction.",
+            "Their tank is part of a permanent outplacement."
+        ])
     }
 }

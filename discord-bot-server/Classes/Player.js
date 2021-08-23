@@ -12,9 +12,9 @@ class Player {
     /**
      * @param {string} uname - new player's username
      */
-    join(uname, shortName = uname.split('').splice(0, 3).join('')){
+    join(uname, shortName){
         if (this.db.getGameStarted()){
-            console.error('ERROR: ' + Error['004'])
+            console.error(Error['004'])
             return '004'
         }
 
@@ -30,7 +30,7 @@ class Player {
         let player = { ...this.db.getPlayer(uname) }
 
         if (player.actionTokens === 0){
-            console.log(Error['003'])
+            console.error(Error['003'])
             return '003'
         }
 
@@ -39,7 +39,7 @@ class Player {
         // parse string
         dir = dir.toUpperCase()
         if (!Utils.DIRECTIONS.includes(dir)){
-            console.log(Error['002'])
+            console.error(Error['002'])
             return '002'
         }
         let result = dir.split('')
@@ -76,7 +76,7 @@ class Player {
 
         // check out of bounds
         if (player.position.r < 0 || player.position.r > Utils.NUM_ROWS-1 || player.position.c < 0 || player.position.c > Utils.NUM_COLS-1){
-            console.log(Error['001'])
+            console.error(Error['001'])
             return '001'
         }
 
@@ -92,7 +92,7 @@ class Player {
             }
         })
         if (ranIntoPlayer){
-            console.log(Error['008'])
+            console.error(Error['008'])
             return '008'
         }
 
@@ -115,12 +115,17 @@ class Player {
         let { r, c } = position
 
         if (actionTokens < 1){
-            console.log(Error['003'])
+            console.error(Error['003'])
             return '003'
         }
 
+        if (!coords){
+            console.error(Error['009'])
+            return '009'
+        }
+
         // parse coordinates
-        coords = coords.toUpperCase()
+        coords = coords ? coords.toUpperCase() : ""
         let splitCoords = coords.split('')
         
         // check valid coordinates
@@ -148,7 +153,7 @@ class Player {
             }
         })
         if (!hitPlayer){
-            console.log(Error['011'])
+            console.error(Error['011'])
             return '011'
         }
         
@@ -192,7 +197,7 @@ class Player {
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
      */
     giftActionToken(uname, coords){
-        this.shoot(uname, coords, false)
+        return this.shoot(uname, coords, false)
     }
 
     /**
@@ -214,7 +219,7 @@ class Player {
     upgradeRange(uname){
         let player = this.db.getPlayer(uname)
         if (player.actionTokens < 1){
-            console.log(Error['003'])
+            console.error(Error['003'])
             return '003'
         }
         player.range++
@@ -233,18 +238,18 @@ class Player {
 
         // make sure players exist
         if (voter === null || recipient === null){
-            console.log(Error['007'])
+            console.error(Error['007'])
             return '007'
         }
 
         // make sure voter is dead
         if (!voter.isDead){
-            console.log(Error['005'])
+            console.error(Error['005'])
             return '005'
         }
         // make sure recipient is not dead
         if (recipient.isDead){
-            console.log(Error['006'])
+            console.error(Error['006'])
             return '006'
         }
 
@@ -270,17 +275,18 @@ class Player {
      * @param {boolean} long - print in long form?
      */
     printInfo(player, long = false){
-        let { name, shortName, health, actionTokens, range, position, color } = player
+        let { name, shortName, health, actionTokens, range, position, color, isDead } = player
         let { r, c } = position
         if (long){
-            return  `-- **${shortName} (${name})** --\n` + 
+            return  `-- **${shortName} (${name})${isDead ? ": Juror" : ""}** --\n` + 
                     `health:       ${health}\n` + 
                     `range:        ${range}\n` + 
                     `actionTokens: ${actionTokens}\n` + 
                     `position:     [${r}, ${c}]\n` + 
                     `color:        ${color}\n`
         } else {
-            return `**${shortName}** (${name}):   ${health} hp,  ${range} range,  ${actionTokens} tokens\n`
+            return `**${shortName}** (${name}):   ` +
+            (isDead ? Utils.getDeathMessage() + "\n" : `${health} hp,  ${range} range,  ${actionTokens} tokens\n`)
         }
     }
 

@@ -17,11 +17,6 @@ class Game {
 
     resetGame(){ this.db.resetGame() }
 
-    randomFromList(arr){
-        let i = Math.floor( Math.random() * arr.length )
-        return arr.splice(i, 1)[0]
-    }
-
     randomizePlayerPositions(){
         // create flat array of all coordinates
         let coords = []
@@ -34,7 +29,7 @@ class Game {
         // get players
         let players = this.db.getPlayers().map(player => {
             // for each player, splice coordinate from the list
-            let coordinates = this.randomFromList(coords).split('-')
+            let coordinates = Utils.randomFromList(coords).split('-')
             player.position.r = parseInt(coordinates[0])
             player.position.c = parseInt(coordinates[1])
 
@@ -59,9 +54,9 @@ class Game {
         
         this.db.getPlayers().forEach(player => {
             if (!player.isDead){
-                player.actionTokens += numTokens
+                player.actionTokens += parseInt(numTokens)
                 if (tally[player.name] >= 3){
-                    player.actionTokens += numTokens
+                    player.actionTokens += parsInt(numTokens)
                 }
                 this.db.updatePlayer(player.name, { actionTokens: player.actionTokens })
             }
@@ -97,28 +92,28 @@ class Game {
         })
 
         // column labels
-        let text = small ? '` ' : '` '
+        let text = small ? ' ' : ' '
         for (let i = 0; i < Utils.NUM_COLS; i++){
             text += small ? ` ${i}` : `   ${i}`
         }
-        text += '`\n'
+        text += '\n'
         if (!small){
-            text += "`  " + " _ _".repeat(Utils.NUM_COLS) + "`\n"
+            text += "  " + " _ _".repeat(Utils.NUM_COLS) + "\n"
         }
 
         // rows
         board.forEach((row, r) => {
-            text += '`'
+            // text += ''
             text += Utils.ROW_NAMES[r] + ' '
             if (small){
-                text += row.join(' ') + '`\n'
+                text += row.join(' ') + '\n'
             } else {
-                text += '|' + row.join('|') + "|`\n"
-                text += "`  |"
+                text += '|' + row.join('|') + "|\n"
+                text += "  |"
                 row.forEach(c => {
                     text += "_" + (healths[c] ? healths[c] : " ") + "_|"
                 })
-                text += "`\n"
+                text += "\n"
             }
         })
 
