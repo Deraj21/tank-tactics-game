@@ -66,6 +66,27 @@ class Game {
         this.db.emptyVotes()
     }
 
+    printVotes(){
+        let votes = this.db.getVotes()
+
+        let tally = {}
+        for (let key in votes){
+            if (tally[votes[key]]){
+                tally[votes[key]]++
+            } else {
+                tally[votes[key]] = 1
+            }
+        }
+
+        let text = "Vote Tallies:\n"
+        for (let key in tally){
+            text += `${key}: ${tally[key]}\n`
+        }
+
+        console.log(text)
+        return text
+    }
+
     printBoard(small = false){
         // create board
         let board = []
@@ -122,7 +143,9 @@ class Game {
 }
 
 module.exports = Game
+
 /*
+
     0   1   2   3   4   5   6   7   8   9
    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
 A |der|   |   |   |   |   |   |   |   |   |
@@ -145,5 +168,20 @@ I |   |   |   |   |   |   |   |   |   |   |
   |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
 J |   |   |   |   |   |   |   |   |   |   |
   |_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|_ _|
+
+
+small = true
+
+  0 1 2 3 4 5 6 7 8 9
+a . . . . . . . . . .
+b . . . . . . . . . .
+c . . . r . . . . . .
+d . . . . . . j . . .
+e . . . . . . . . . .
+f . . . . . . t . . .
+g . . . . . . . . . .
+h . . . . . a . . . .
+i . . . . . . . . . .
+j . . . . . . . . . .
 
 */

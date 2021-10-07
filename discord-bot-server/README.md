@@ -5,8 +5,8 @@
 - [Questions](#questions)
 - [TODO](#todo)
   - [Node server Todo](#node-server-todo)
-  - [Create Replit database](#create-replit-database)
-  - [Add post-mvp commands](#add-post-mvp-commands)
+  - [Replit Database](#replit-database)
+  - [post-mvp](#post-mvp-1)
 
 ---
 
@@ -52,44 +52,24 @@
 
 ## TODO
 ### Node server Todo
-- ~~parseCommand function~~
-- Admin:
-  - when adding daily tokens, show voting tallies
 - Players:
-  - ~~join~~
-    - ~~add ability to specify 3-letter name~~
-  - ~~move~~
-  - ~~shoot~~
-    - ~~errors showing when... out of range, shooting empty space, out of tokens~~
-  - ~~upgrade-range~~
-  - ~~gift-action-token~~
-  - vote
-- ~~figure out how to show all game data at once with just ascii~~
-- try to make board look readable on phones (maybe try using 3 tic marks instead of just one )
-### Create Replit database
-- up to this point, everything is done with dummy un-persisted data
-- so, create db, and start writing data
-### Add post-mvp commands
+  - ~~vote~~
+- Admin:
+  - ~~when adding daily tokens, show voting tallies~~
+  - ~~get-votes~~
+  - ~~get-players (test)~~
+- Testing:
+  - get rachel to try a bunch of commands and rough test stuff out
+  - ask her to try and break it
+### Replit Database
+- watch youtube video again to get gist of it
+- convert functions over to use database to persist data
+- test test test
+### post-mvp
+- figure out if I can build svg, convert to png, and then post on discord
 - Admin
-    - game-setting
-    - remove-player
-    - get-players
-    - get-votes
+  - game-setting
+  - remove-player
 
 ---
 
-<!-- Board 10x10
-
-  0 1 2 3 4 5 6 7 8 9
-a . . . . . . . . . .
-b . . . . . . . . . .
-c . . . r . . . . . .
-d . . . . . . j . . .
-e . . . . . . . . . .
-f . . . . . . t . . .
-g . . . . . . . . . .
-h . . . . . a . . . .
-i . . . . . . . . . .
-j . . . . . . . . . .
-
--->

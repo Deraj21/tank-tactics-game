@@ -34,9 +34,8 @@ function parseCommand(msg){
         switch(command){
             case "!daily-tokens":
                 game.giveDailyTokens(...split)
-                msg.reply("daily tokens have been given out")
+                msg.reply( game.printVotes() )
                 playersUpdated = true
-                // TODO: show vote tally (not who voted but whom recieved the votes)
                 break;
             case "!start-game":
             case "!start":
@@ -49,18 +48,18 @@ function parseCommand(msg){
                 msg.reply("game has been reset. players can join until the game starts")
                 game.resetGame()
                 break;
-            case "!get-game-data": // for debugging
-                console.log(db.getPlayers())
-                console.log(db.getVotes())
-                console.log(`gameStarted: ${db.getGameStarted()}`)
+            case "!get-players": // for debugging
+                playersUpdated = true
+                break;
+            case "!get-votes":
+                console.log("getting votes")
+                msg.reply( game.printVotes() )
                 break;
             case "!clear-channel":
                 msg.reply("Deleting stuff...")
-                
-                console.log(
-                    msg.channel
-                )
-
+                // console.log(
+                //     msg.channel
+                // )
                 break;
             default:
                 invalidCommand = true
@@ -84,7 +83,10 @@ function parseCommand(msg){
                 shortName = split[0]
             }
 
-            player.join(msg.author.username, shortName)
+            result = player.join(msg.author.username, shortName)
+            if (Utils.catchError(result)){
+                return result
+            }
             msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
             break;
         case "!move":

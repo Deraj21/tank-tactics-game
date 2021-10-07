@@ -10,7 +10,7 @@ module.exports = {
     "009": "Invalid coordinates",
     "010": "You do not have enough range",
     "011": "You cannot shoot at nothing",
-    "012": "",
+    "012": "You have already joined the game",
     "013": "",
     "014": "",
     "015": "",

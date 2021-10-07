@@ -13,7 +13,8 @@ class Database {
     addTestData(){
         this.createPlayer("AbyssalMoth",    "abm")
         this.createPlayer("D00m Incarnate", "doo")
-        this.createPlayer("PearlHeart",     "prl")
+        this.createPlayer("PearlHeart",     "prl"),
+        this.createPlayer("deraj21",        "der")
     }
 
     createPlayer(username, shortName){

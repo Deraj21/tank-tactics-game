@@ -18,6 +18,16 @@ class Player {
             return '004'
         }
 
+        let alreadyJoined = false
+        this.db.getPlayers().forEach( p => {
+            if (p.name === uname)
+                alreadyJoined = true
+        })
+        if (alreadyJoined){
+            console.log(Error['012'])
+            return '012'
+        }
+
         this.db.createPlayer(uname, shortName)
     }
 
