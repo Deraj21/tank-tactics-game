@@ -1,5 +1,5 @@
-const   Utils = require('./Utilities'),
-        Error = require('./ErrorCodes')
+import Utils from './Utilities.js'
+import Error from './ErrorCodes.js'
 
 /**
  * Player
@@ -314,5 +314,5 @@ class Player {
     }
 }
 
-module.exports = Player
+export default Player
 

@@ -1,5 +1,5 @@
-const   Utils = require('./Utilities'),
-        Error = require('./ErrorCodes')
+import Utils from './Utilities.js'
+import Error from './ErrorCodes.js'
     
 class Database {
     constructor(){
@@ -13,7 +13,7 @@ class Database {
     addTestData(){
         this.createPlayer("AbyssalMoth",    "abm")
         this.createPlayer("D00m Incarnate", "doo")
-        this.createPlayer("PearlHeart",     "prl"),
+        this.createPlayer("PearlHeart",     "prl")
         this.createPlayer("deraj21",        "der")
     }
 
@@ -90,4 +90,4 @@ class Database {
     }
 }
 
-module.exports = Database
+export default Database

@@ -3,15 +3,20 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
+    "start": "node index.js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "d3": "^7.1.1",
     "discord.js": "^13.0.1",
     "dotenv": "^10.0.0",
-    "node": "^16.13.0"
+    "jsdom": "^18.0.1",
+    "node": "^16.13.0",
+    "sharp": "^0.29.2"
   }
 }

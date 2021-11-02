@@ -1,4 +1,4 @@
-module.exports = {
+export default {
     NUM_ROWS: 10,
     NUM_COLS: 10,
     ROW_NAMES: ['A','B','C','D','E','F','G','H','I','J'],

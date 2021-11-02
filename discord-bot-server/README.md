@@ -7,6 +7,7 @@
   - [Node server Todo](#node-server-todo)
   - [Replit Database](#replit-database)
   - [post-mvp](#post-mvp-1)
+- [Useful Links](#useful-links)
 
 ---
 
@@ -57,8 +58,8 @@
   - ~~learn how to convert smiley to png~~
   - ~~post smiley on discord~~
   - generate svg game board (with dummy data)
-  - get bot to convert dummy board to png, and post
-  - replace dummy data with real data
+  - get bot to post board with dummy data
+  - replace dummy data with 'real' data
 - **Testing!:**
   - get rachel to try a bunch of commands and rough test stuff out
   - ask her to try and break it

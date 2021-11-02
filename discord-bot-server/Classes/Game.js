@@ -1,6 +1,13 @@
-const   Player = require('./Player'),
-        Error = require('./ErrorCodes'),
-        Utils = require('./Utilities')
+import Utils from './Utilities.js'
+import jsdom from 'jsdom'
+import sharp from 'sharp'
+import { MessageAttachment, MessagePayload, SnowflakeUtil,  } from 'discord.js'
+
+import { select } from 'd3'
+
+// const { select } = d3
+const { JSDOM } = jsdom
+const dom = new JSDOM('<!DOCTYPE thml><body></body>')
 
 /**
  * Game
@@ -142,11 +149,82 @@ class Game {
     }
 
     postSmiley(discordMsg){
+        const svgString = `
+        <svg id="smiley2" height="200" width="200">
+            <circle cx="100" cy="100" r="100" fill="green" stroke="black" />
+            <g id="eyes" transform="translate(100 60)">
+                <circle cx="-40" r="10" fill="black" />
+                <circle cx="40" r="10" fill="black" />
+            </g>
+            <path stroke="black" fill="none" stroke-width="5px" d="M 50 100 A 50 50 0 0 0 150 100"/>
+        </svg>`
+    
+        // setup body
+        let body = select(dom.window.document.querySelector('body'))
         
+        // build svg
+        let svg = body.append('svg')
+            .attr('height', 200)
+            .attr('width',  200)
+        
+        let circle = svg.append('circle')
+            .attr('cx', 100)
+            .attr('cy', 100)
+            .attr('r', 100)
+            .attr('fill', 'gold')
+            .attr('stroke', 'black')
+        
+        const eyesTrans = { x: 100, y: 60 }
+        let eyes = svg.append('g')
+            .attr('transform', `translate(${eyesTrans.x}, ${eyesTrans.y}`)
+            .attr('stroke', 'black')
+        
+        let eyeTranslations = [40, -40]
+        eyeTranslations.forEach(cx => {
+            eyes.append('circle')
+                .attr('cx', cx)
+                .attr('r', 10)
+                .attr('fill', 'black')
+        })
+        
+        let mouth = svg.append('path')
+            .attr('d', 'M 50 100 A 50 50 0 0 0 150 100')
+            .attr('stroke', 'black')
+            .attr('fill', 'none')
+            .attr('stroke-width', 5)
+            
+        const svgString2 = body.html()
+        const fileName = 'smile-test.png'
+        
+        // create file
+        let svgBuffer = Buffer.from(svgString2, 'utf-8')
+        let svgSharp = sharp(svgBuffer)
+            .toFormat('png')
+            .toBuffer()
+            .then(data => {
+                const attachmentFromBuffer = new MessageAttachment(data, {
+                    id: SnowflakeUtil.generate(),
+                    filename: fileName,
+                    description: 'Yellow smiley face for testing',
+                    media_type: 'image'
+                })
+
+                console.log(data)
+                discordMsg.channel.send({ files: [ data ] })
+                .then(res => {
+                    console.log(res)
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            })
+            .catch(err => {
+                console.log("sharp image failed:", err)
+            })
     }
 }
 
-module.exports = Game
+export default Game
 
 /*
 

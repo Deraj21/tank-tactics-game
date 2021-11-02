@@ -1,21 +1,23 @@
 // node modules
-require('dotenv').config()
-const Discord = require("discord.js")
+import dotenv from 'dotenv'
+import Discord from "discord.js"
 
 // my modules
-const Game = require("./Classes/Game.js")
-const Player = require("./Classes/Player.js")
-const Error = require("./Classes/ErrorCodes.js")
-const Utils = require("./Classes/Utilities.js")
-const Database = require("./Classes/Database.js")
+import Game from "./Classes/Game.js"
+import Player from "./Classes/Player.js"
+import Error from "./Classes/ErrorCodes.js"
+import Utilities from "./Classes/Utilities.js"
+import Database from "./Classes/Database.js"
 
-// setup data
+// setup
+dotenv.config()
+const { catchError } = Utilities
 const { Intents, Client } = Discord
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
 const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
-const   db = new Database()
+const   db = new Database(),
         game = new Game(db),
         player = new Player(db)
 
@@ -62,8 +64,8 @@ function parseCommand(msg){
                 // )
                 break;
             case "!smile":
-                msg.reply("Smiley");
-                game.postSmiley(msg)
+                game.postSmiley(msg);
+                break;
             default:
                 invalidCommand = true
                 break;
@@ -87,7 +89,7 @@ function parseCommand(msg){
             }
 
             result = player.join(msg.author.username, shortName)
-            if (Utils.catchError(result)){
+            if (catchError(result)){
                 return result
             }
             msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
@@ -95,7 +97,7 @@ function parseCommand(msg){
         case "!move":
         case "!m":
             result = player.move(msg.author.username, ...split)
-            if (Utils.catchError(result)){
+            if (catchError(result)){
                 return result
             }
             boardUpdated = true
@@ -104,7 +106,7 @@ function parseCommand(msg){
         case "!shoot":
         case "!s":
             result = player.shoot(msg.author.username, split[0])
-            if (Utils.catchError(result)){
+            if (catchError(result)){
                 return result
             }
             boardUpdated = true
@@ -112,7 +114,7 @@ function parseCommand(msg){
         case "!upgrade-range":
         case "!ur":
             result = player.upgradeRange(msg.author.username)
-            if (Utils.catchError(result)){
+            if (catchError(result)){
                 return result
             }
             boardUpdated = true
@@ -120,7 +122,7 @@ function parseCommand(msg){
         case "!gift-token":
         case "!gt":
             result = player.giftActionToken(msg.author.username, ...split)
-            if (Utils.catchError(result)){
+            if (catchError(result)){
                 return result
             }
             boardUpdated = true
@@ -168,7 +170,7 @@ client.on('messageCreate', msg => {
     if (msg.channel.name === "call-out-moves") {
         if (msg.content.match(/^\!.*/)){ // starts with !
             let res = parseCommand(msg)
-            if (Utils.catchError(res)){
+            if (catchError(res)){
                 msg.reply(Error[res])
             }
         }

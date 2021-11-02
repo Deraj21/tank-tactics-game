@@ -1,4 +1,4 @@
-module.exports = {
+const ErrorCodes = {
     "001": "Tank cannot move out of bounds",
     "002": "Invalid cardinal direction",
     "003": "You do not have any action tokens",
@@ -20,3 +20,5 @@ module.exports = {
     "019": "",
     "020": ""
 }
+
+export default ErrorCodes
