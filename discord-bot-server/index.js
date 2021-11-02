@@ -61,6 +61,9 @@ function parseCommand(msg){
                 //     msg.channel
                 // )
                 break;
+            case "!smile":
+                msg.reply("Smiley");
+                game.postSmiley(msg)
             default:
                 invalidCommand = true
                 break;

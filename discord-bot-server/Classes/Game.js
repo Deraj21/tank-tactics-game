@@ -140,6 +140,10 @@ class Game {
 
         return text
     }
+
+    postSmiley(discordMsg){
+        
+    }
 }
 
 module.exports = Game

@@ -52,17 +52,17 @@
 
 ## TODO
 ### Node server Todo
-- Players:
-  - ~~vote~~
-- Admin:
-  - ~~when adding daily tokens, show voting tallies~~
-  - ~~get-votes~~
-  - ~~get-players (test)~~
-- Testing:
+- **Generating & posting the game Board**
+  - ~~create smiley svg~~
+  - ~~learn how to convert smiley to png~~
+  - ~~post smiley on discord~~
+  - generate svg game board (with dummy data)
+  - get bot to convert dummy board to png, and post
+  - replace dummy data with real data
+- **Testing!:**
   - get rachel to try a bunch of commands and rough test stuff out
   - ask her to try and break it
 ### Replit Database
-- watch youtube video again to get gist of it
 - convert functions over to use database to persist data
 - test test test
 ### post-mvp
@@ -72,4 +72,8 @@
   - remove-player
 
 ---
+
+## Useful Links
+- [generate svg files with node.js](https://medium.com/@92sharmasaurabh/generate-svg-files-using-nodejs-d3-647d5b4f56eb)
+- [sharp docs - toFile()](https://sharp.pixelplumbing.com/api-output#tofile)
 
