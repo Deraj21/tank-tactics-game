@@ -3,11 +3,27 @@ import jsdom from 'jsdom'
 import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil,  } from 'discord.js'
 
-import { select } from 'd3'
+import { select, scaleLinear, axisTop, axisLeft } from 'd3'
 
 // const { select } = d3
 const { JSDOM } = jsdom
-const dom = new JSDOM('<!DOCTYPE thml><body></body>')
+const dom = new JSDOM('<!DOCTYPE html><body></body>'),
+    H = 600,
+    W = H,
+    NUM_COLS = 10,
+    NUM_ROWS = 10,
+    ROW_NAMES = ['A','B','C','D','E','F','G','H','I','J'],
+    margin = {
+        left:   20,
+        right:  0,
+        top:    20,
+        bottom: 0
+    },
+    innerW = W - margin.left - margin.right,
+    innerH = H - margin.top - margin.bottom,
+    w = innerW / NUM_COLS,
+    h = innerH / NUM_ROWS
+
 
 /**
  * Game
@@ -146,6 +162,143 @@ class Game {
         })
 
         return text
+    }
+
+    postBoard(discordMsg){
+        const players = [
+            {
+                name: "Deraj21",
+                shortName: "Der",
+                health: 1,
+                actionTokens: 0,
+                range: 2,
+                position: { r: 0, c: 0 },
+                color: hashRGB("Deraj21"),
+                isDead: false
+            },
+            {
+                name: "AbyssalMoth",
+                shortName: "Abm",
+                health: 2,
+                actionTokens: 3,
+                range: 3,
+                position: { r: 7, c: 4 },
+                color: hashRGB("AbyssalMoth"),
+                isDead: false
+            },
+            {
+                name: "D00M",
+                shortName: "D00",
+                health: 3,
+                actionTokens: 17,
+                range: 2,
+                position: { r: 3, c: 9 },
+                color: hashRGB("D00M"),
+                isDead: false
+            }
+        ]
+
+        // 
+        const body = select(dom.window.document.querySelector('body'))
+        const svg = body.append('svg')
+            .attr('height', H)
+            .attr('width', W)
+
+        // scales
+        const xScale = scaleLinear()
+            .domain([0, NUM_ROWS])
+            .range([0, innerW])
+
+        const yScale = scaleLinear()
+            .domain([0, NUM_COLS])
+            .range([0, innerH])
+            .nice()
+
+        // axis
+        const xAxis = axisTop(xScale)
+            .tickSize(-innerH)
+            .tickPadding(10)
+            // .tickFormat(format(''))
+        const yAxis = axisLeft(yScale)
+            .tickSize(-innerW)
+            .tickPadding(5)
+            .tickFormat(n => ROW_NAMES[n])
+
+        let g = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`)
+
+        // yAxis
+        const yAxisG = g.append('g').call(yAxis)
+        yAxisG.selectAll('text')
+            .attr('transform', `translate(0,${innerH / NUM_ROWS / 2})`)
+
+        // xAxis
+        const xAxisG = g.append('g').call(xAxis)
+        xAxisG.selectAll('text')
+            .attr('transform', `translate(${innerW / NUM_COLS / 2},0)`)
+
+        // players (tanks)
+        players.forEach(playerData => {
+            this.appendPlayer(playerData, g)
+        })
+
+
+
+
+    }
+
+    appendPlayer(data, g){
+        const { name, shortName, health, actionTokens, range, position, color, isDead } = data
+        const textMargin = 3,
+            fontSize = 12,
+            heartH = h / 2.5,
+            tokenW = w / 6
+        let addZero = n => n = n < 10 ? '0'+n : ""+n
+
+        let player = g.append('g')
+            .attr('transform', `translate(${position.r * w-1},${position.c * h-1})`)
+        
+        let tank = player.append('rect')
+            .attr('fill', color)
+            .attr('stroke', 'black')
+            .attr('height', h)
+            .attr('width', w)
+
+        let heart = player.append('g')
+            .attr('transform', `translate(${w/2},${fontSize + 2*textMargin + 3})`)
+        heart.append('path')
+            .attr('d', `M0,${heartH} A1,2 140 0 1 0,0 A1,2 40 0 1 0,${heartH}`)
+            .attr('fill', 'red')
+
+        let arc = d3.arc()
+            .innerRadius(0)
+            .outerRadius(w/2 - textMargin)
+            .startAngle(0)
+            .endAngle(Math.PI*2 * (1 - health / 3));
+        heart.append('path')
+            .attr('transform', `translate(${textMargin-3},${fontSize + textMargin-5})`)
+            .attr('d', arc)
+            .attr('fill', color)
+
+        // name
+        let nameElm = player.append('text')
+            .text(name)
+            .attr('transform', `translate(${textMargin},${fontSize + textMargin})`)
+            .attr('font-size', fontSize)
+
+        let tokensCounter = player.append('g')
+            .attr('transform', `translate(${w-tokenW-textMargin},${h-tokenW-textMargin})`)
+        tokensCounter.append('circle')
+            .attr('r', tokenW)
+            .attr('fill', 'springgreen')
+            .attr('stroke', 'black')
+        tokensCounter.append('text')
+            .text(addZero(actionTokens))
+            .attr('font-size', fontSize)
+            .attr('transform', `translate(${-fontSize/2},${fontSize/3})`)
+        
+
+        return player
     }
 
     postSmiley(discordMsg){

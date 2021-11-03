@@ -5,7 +5,7 @@ export default {
     DIRECTIONS: ['N','S','W','E','NW','SW','NE','SE'],
 
     // takes any string, and hashes it into rgb values
-    hashRGB: function (str){
+    hashRGB: function (str, lighten = true){
         // Taken and reworked from https://stackoverflow.com/questions/3426404/create-a-hexadecimal-colour-based-on-a-string-with-javascript
         str = str + str;
 
@@ -31,7 +31,16 @@ export default {
         let g = hexVals[hex[2]] * 16 + hexVals[hex[3]];
         let b = hexVals[hex[4]] * 16 + hexVals[hex[5]];
 
-        return `RGB(${r},${g},${b})`;
+        // lighten
+        if (lighten){
+            const lightenFactor = .6 // closer to 1 = closer to white
+            const max = 255
+            let [rl,gl,bl] = [r,g,b].map(color => color + ((max - color) * lightenFactor))
+
+            return `RGB(${rl},${gl},${bl})`
+        } else {
+            return `RGB(${r},${g},${b})`
+        }
     },
 
     catchError: function(str) {
