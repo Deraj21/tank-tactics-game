@@ -7,7 +7,7 @@ import Game from "./Classes/Game.js"
 import Player from "./Classes/Player.js"
 import Error from "./Classes/ErrorCodes.js"
 import Utilities from "./Classes/Utilities.js"
-import Database from "./Classes/Database.js"
+import dbHelper from "./Classes/dbHelper.js"
 
 // setup
 dotenv.config()
@@ -17,9 +17,6 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
-const   db = new Database(),
-        game = new Game(db),
-        player = new Player(db)
 
 
 function parseCommand(msg){
@@ -35,27 +32,27 @@ function parseCommand(msg){
         // Admin
         switch(command){
             case "!daily-tokens":
-                game.giveDailyTokens(...split)
-                msg.reply( game.printVotes() )
+                Game.giveDailyTokens(...split)
+                msg.reply( Game.printVotes() )
                 playersUpdated = true
                 break;
             case "!start-game":
             case "!start":
-                game.startGame()
+                Game.startGame()
                 boardUpdated = true;
     
                 break;
             case "!reset-game":
             case "!reset":
                 msg.reply("game has been reset. players can join until the game starts")
-                game.resetGame()
+                Game.resetGame()
                 break;
             case "!get-players": // for debugging
                 playersUpdated = true
                 break;
             case "!get-votes":
                 console.log("getting votes")
-                msg.reply( game.printVotes() )
+                msg.reply( Game.printVotes() )
                 break;
             case "!clear-channel":
                 msg.reply("Deleting stuff...")
@@ -64,7 +61,7 @@ function parseCommand(msg){
                 // )
                 break;
             case "!smile":
-                game.postBoard(msg);
+                Game.postBoard(msg);
                 break;
             default:
                 invalidCommand = true
@@ -88,7 +85,7 @@ function parseCommand(msg){
                 shortName = split[0]
             }
 
-            result = player.join(msg.author.username, shortName)
+            result = Player.join(msg.author.username, shortName)
             if (catchError(result)){
                 return result
             }
@@ -96,7 +93,7 @@ function parseCommand(msg){
             break;
         case "!move":
         case "!m":
-            result = player.move(msg.author.username, ...split)
+            result = Player.move(msg.author.username, ...split)
             if (catchError(result)){
                 return result
             }
@@ -105,7 +102,7 @@ function parseCommand(msg){
             break;
         case "!shoot":
         case "!s":
-            result = player.shoot(msg.author.username, split[0])
+            result = Player.shoot(msg.author.username, split[0])
             if (catchError(result)){
                 return result
             }
@@ -113,7 +110,7 @@ function parseCommand(msg){
             break;
         case "!upgrade-range":
         case "!ur":
-            result = player.upgradeRange(msg.author.username)
+            result = Player.upgradeRange(msg.author.username)
             if (catchError(result)){
                 return result
             }
@@ -121,7 +118,7 @@ function parseCommand(msg){
             break;
         case "!gift-token":
         case "!gt":
-            result = player.giftActionToken(msg.author.username, ...split)
+            result = Player.giftActionToken(msg.author.username, ...split)
             if (catchError(result)){
                 return result
             }
@@ -129,7 +126,7 @@ function parseCommand(msg){
             break;
         case "!vote":
         case "!v":
-            result = player.vote(msg.author.username, ...split)
+            result = Player.vote(msg.author.username, ...split)
             msg.reply(`player ${msg.author.username} is voting for ${split.join(' ')}`)
             msg.author.send('You can start dming me now')
             break;
@@ -150,7 +147,7 @@ function parseCommand(msg){
     if (boardUpdated){
         game.postBoard(msg)
     } else if (playersUpdated){
-        msg.reply( player.printPlayers() )
+        msg.reply( Player.printPlayers() )
     }
 }
 

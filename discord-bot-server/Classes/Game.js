@@ -1,5 +1,5 @@
 import Utils from './Utilities.js'
-import db from './Database.js'
+import dbHelper from './dbHelper'
 import jsdom from 'jsdom'
 import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
@@ -30,19 +30,15 @@ const dom = new JSDOM('<!DOCTYPE html><body></body>'),
 /**
  * Game
  */
-class Game {
-    constructor(db){
-        this.db = db
-    }
-
-    startGame(){
-        this.db.setGameStarted(true)
+const Game = {
+    startGame: function(){
+        dbHelper.setGameStarted(true)
         this.randomizePlayerPositions()
-    }
-
-    resetGame(){ this.db.resetGame() }
-
-    randomizePlayerPositions(){
+    },
+    resetGame: function(){
+        dbHelper.resetGame()
+    },
+    randomizePlayerPositions: function(){
         // create flat array of all coordinates
         let coords = []
         for (let r = 0; r < Utils.NUM_ROWS; r++){
@@ -52,7 +48,7 @@ class Game {
         }
 
         // get players
-        let players = this.db.getPlayers().map(player => {
+        let players = dbHelper.getPlayers().map(player => {
             // for each player, splice coordinate from the list
             let coordinates = Utils.randomFromList(coords).split('-')
             player.position.r = parseInt(coordinates[0])
@@ -62,12 +58,11 @@ class Game {
         })
 
         // update database
-        this.db.updatePlayers(players)
-    }
-
-    giveDailyTokens(numTokens = 1){
+        dbHelper.updatePlayers(players)
+    },
+    giveDailyTokens: function(numTokens = 1){
         // tally votes
-        let votes = this.db.getVotes()
+        let votes = dbHelper.getVotes()
         let tally = {}
         for (let key in votes){
             if (tally[votes[key]]){
@@ -77,22 +72,21 @@ class Game {
             }
         }
         
-        this.db.getPlayers().forEach(player => {
+        dbHelper.getPlayers().forEach(player => {
             if (!player.isDead){
                 player.actionTokens += parseInt(numTokens)
                 if (tally[player.name] >= 3){
                     player.actionTokens += parsInt(numTokens)
                 }
-                this.db.updatePlayer(player.name, { actionTokens: player.actionTokens })
+                dbHelper.updatePlayer(player.name, { actionTokens: player.actionTokens })
             }
         })
 
         // 'forget' votes
-        this.db.emptyVotes()
-    }
-
-    printVotes(){
-        let votes = this.db.getVotes()
+        dbHelper.emptyVotes()
+    },
+    printVotes: function(){
+        let votes = dbHelper.getVotes()
 
         let tally = {}
         for (let key in votes){
@@ -110,9 +104,8 @@ class Game {
 
         console.log(text)
         return text
-    }
-
-    printBoard(small = false){
+    },
+    printBoard: function(small = false){
         // create board
         let board = []
         let healths = {}
@@ -125,7 +118,7 @@ class Game {
             board.push(row)
         }
         // place 'tanks'
-        this.db.getPlayers().forEach(p => {
+        dbHelper.getPlayers().forEach(p => {
             if (p.isDead){
                 return
             }
@@ -249,9 +242,8 @@ class Game {
             })
 
 
-    }
-
-    appendPlayer(data, g){
+    },
+    appendPlayer: function(data, g){
         const { name, shortName, health, actionTokens, range, position, color, isDead } = data
         const textMargin = 3,
             fontSize = 12,
@@ -303,9 +295,8 @@ class Game {
         
 
         return player
-    }
-
-    postSmiley(discordMsg){
+    },
+    postSmiley: function(discordMsg){
         const svgString = `
         <svg id="smiley2" height="200" width="200">
             <circle cx="100" cy="100" r="100" fill="green" stroke="black" />

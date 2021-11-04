@@ -1,25 +1,20 @@
 import Utils from './Utilities.js'
 import Error from './ErrorCodes.js'
+import dbHelper from './dbHelper.js'
 
-/**
- * Player
- */
-class Player {
-    constructor(db){
-        this.db = db
-    }
 
+const Player = {
     /**
      * @param {string} uname - new player's username
      */
-    join(uname, shortName){
-        if (this.db.getGameStarted()){
+    join: function(uname, shortName){
+        if (dbHelper.getGameStarted()){
             console.error(Error['004'])
             return '004'
         }
 
         let alreadyJoined = false
-        this.db.getPlayers().forEach( p => {
+        dbHelper.getPlayers().forEach( p => {
             if (p.name === uname)
                 alreadyJoined = true
         })
@@ -28,16 +23,16 @@ class Player {
             return '012'
         }
 
-        this.db.createPlayer(uname, shortName)
-    }
+        dbHelper.createPlayer(uname, shortName)
+    },
 
     /**
      * move - move player in cardinal direction by one
      * @param {string} uname - username of player doing the action
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'
      */
-    move(uname, dir){
-        let player = { ...this.db.getPlayer(uname) }
+    move: function(uname, dir){
+        let player = { ...dbHelper.getPlayer(uname) }
 
         if (player.actionTokens === 0){
             console.error(Error['003'])
@@ -107,11 +102,11 @@ class Player {
         }
 
         player.actionTokens--
-        this.db.updatePlayer(uname, {
+        dbHelper.updatePlayer(uname, {
             actionTokens: player.actionTokens,
             position: { ...player.position }
         })
-    }
+    },
 
     /**
      * shoot - player shoots at coordinate on board
@@ -119,8 +114,8 @@ class Player {
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
      * @param {boolean} isShooting - is player shooting or gifting an action point
      */
-    shoot(uname, coords, isShooting = true){
-        let player = this.db.getPlayer(uname)
+    shoot: function(uname, coords, isShooting = true){
+        let player = dbHelper.getPlayer(uname)
         let { range, position, actionTokens } = player
         let { r, c } = position
 
@@ -177,15 +172,15 @@ class Player {
         // remove action token
         player.actionTokens--
 
-        this.db.updatePlayer(uname, player)
-    }
+        dbHelper.updatePlayer(uname, player)
+    },
 
     /**
      * takeDamage - take 1 health from player, and check if dead
      * @param {string} uname - username of player taking damage
      */
-    takeDamage(uname){
-        let player = this.db.getPlayer(uname)
+    takeDamage: function(uname){
+        let player = dbHelper.getPlayer(uname)
         player.health--
         
         // check death
@@ -194,40 +189,40 @@ class Player {
             player.position = { r: -1, c: -1 }
         }
         
-        this.db.updatePlayer(uname, {
+        dbHelper.updatePlayer(uname, {
             health: player.health,
             isDead: player.isDead,
             position: { ...player.position }
         })
-    }
+    },
 
     /**
      * giftActionToken - gift another player an action token
      * @param {string} uname - username of player giving the token
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
      */
-    giftActionToken(uname, coords){
+    giftActionToken: function(uname, coords){
         return this.shoot(uname, coords, false)
-    }
+    },
 
     /**
      * recieveToken - give player an action token
      * @param {string} uname - username of player recieving token
      */
-    receiveToken(uname){
-        let player = this.db.getPlayer(uname)
+    receiveToken: function(uname){
+        let player = dbHelper.getPlayer(uname)
         player.actionTokens++
-        this.db.updatePlayer(uname, {
+        dbHelper.updatePlayer(uname, {
             actionTokens: player.actionTokens
         })
-    }
+    },
     
     /**
      * upgradeRange - up the player's range by 1
      * @param {string} uname - username of player doing the action
      */
-    upgradeRange(uname){
-        let player = this.db.getPlayer(uname)
+    upgradeRange: function(uname){
+        let player = dbHelper.getPlayer(uname)
         if (player.actionTokens < 1){
             console.error(Error['003'])
             return '003'
@@ -235,16 +230,16 @@ class Player {
         player.range++
         player.actionTokens--
 
-        this.db.updatePlayer(uname, player)
-    }
+        dbHelper.updatePlayer(uname, player)
+    },
     
     /**
      * @param {string} voterUname - username of Jurer
      * @param {string} recipientUname - username that the Jurer submitted
      */
-    vote(voterUname, recipientUname){
-        let voter = this.db.getPlayer(voterUname)
-        let recipient = this.db.getPlayer(recipientUname)
+    vote: function(voterUname, recipientUname){
+        let voter = dbHelper.getPlayer(voterUname)
+        let recipient = dbHelper.getPlayer(recipientUname)
 
         // make sure players exist
         if (voter === null || recipient === null){
@@ -263,28 +258,28 @@ class Player {
             return '006'
         }
 
-        this.db.updateVote(voterUname, recipientUname)
-    }
+        dbHelper.updateVote(voterUname, recipientUname)
+    },
     
     /**
      * get all player positions from db
      * @returns {Object} - player positions
      */
-    getPlayerPositions(){
-        return this.db.getPlayers().map(p => {
+    getPlayerPositions: function(){
+        return dbHelper.getPlayers().map(p => {
             return {
                 name: p.name,
                 position: p.position
             }
         })
-    }
+    },
 
     /**
      * printInfo - prints out a players info
      * @param {Object} player - player info that will be printed
      * @param {boolean} long - print in long form?
      */
-    printInfo(player, long = false){
+    printInfo: function(player, long = false){
         let { name, shortName, health, actionTokens, range, position, color, isDead } = player
         let { r, c } = position
         if (long){
@@ -298,20 +293,20 @@ class Player {
             return `**${shortName}** (${name}):   ` +
             (isDead ? Utils.getDeathMessage() + "\n" : `${health} hp,  ${range} range,  ${actionTokens} tokens\n`)
         }
-    }
+    },
 
     /**
      * printPlayers - prints info of multiple players
      * @param  {...string} unames - array of player names to print; if empty, will print all players
      */
-    printPlayers(...unames){
+    printPlayers: function(...unames){
         if (unames.length === 0){
             // print all
-            return this.db.getPlayers().map( p => this.printInfo(p) ).join("")
+            return dbHelper.getPlayers().map( p => this.printInfo(p) ).join("")
         } else {
-            return unames.map(uname => this.printInfo( this.db.getPlayer(uname) )).join("")
+            return unames.map(uname => this.printInfo( dbHelper.getPlayer(uname) )).join("")
         }
-    }
+    },
 }
 
 export default Player
