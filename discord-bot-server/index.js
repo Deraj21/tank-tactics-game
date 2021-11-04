@@ -61,7 +61,7 @@ function parseCommand(msg){
                 // )
                 break;
             case "!smile":
-                Game.postSmiley(msg);
+                Game.postBoard(msg);
                 break;
             default:
                 invalidCommand = true
@@ -145,10 +145,7 @@ function parseCommand(msg){
     }
 
     if (boardUpdated){
-        msg.reply(
-            "```\n" + Game.printBoard(false) + "```\n" +
-            Player.printPlayers()
-        )
+        game.postBoard(msg)
     } else if (playersUpdated){
         msg.reply( Player.printPlayers() )
     }
