@@ -1,24 +1,26 @@
 import Utils from './Utilities.js'
+import db from './Database.js'
 import jsdom from 'jsdom'
 import sharp from 'sharp'
-import { MessageAttachment, MessagePayload, SnowflakeUtil,  } from 'discord.js'
+import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
-import { select, scaleLinear, axisTop, axisLeft } from 'd3'
+import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
+const { hashRGB } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
 const dom = new JSDOM('<!DOCTYPE html><body></body>'),
     H = 600,
     W = H,
+    margin = {
+        left:   20,
+        right:  5,
+        top:    20,
+        bottom: 5
+    },
     NUM_COLS = 10,
     NUM_ROWS = 10,
     ROW_NAMES = ['A','B','C','D','E','F','G','H','I','J'],
-    margin = {
-        left:   20,
-        right:  0,
-        top:    20,
-        bottom: 0
-    },
     innerW = W - margin.left - margin.right,
     innerH = H - margin.top - margin.bottom,
     w = innerW / NUM_COLS,
@@ -164,45 +166,21 @@ class Game {
         return text
     }
 
+    /**
+     * @param {Message} - discordMsg
+     */
     postBoard(discordMsg){
-        const players = [
-            {
-                name: "Deraj21",
-                shortName: "Der",
-                health: 1,
-                actionTokens: 0,
-                range: 2,
-                position: { r: 0, c: 0 },
-                color: hashRGB("Deraj21"),
-                isDead: false
-            },
-            {
-                name: "AbyssalMoth",
-                shortName: "Abm",
-                health: 2,
-                actionTokens: 3,
-                range: 3,
-                position: { r: 7, c: 4 },
-                color: hashRGB("AbyssalMoth"),
-                isDead: false
-            },
-            {
-                name: "D00M",
-                shortName: "D00",
-                health: 3,
-                actionTokens: 17,
-                range: 2,
-                position: { r: 3, c: 9 },
-                color: hashRGB("D00M"),
-                isDead: false
-            }
-        ]
+        const players = this.db.getPlayers()
 
         // 
         const body = select(dom.window.document.querySelector('body'))
         const svg = body.append('svg')
             .attr('height', H)
             .attr('width', W)
+        svg.append("rect")
+            .attr("width", "100%")
+            .attr("height", "100%")
+            .attr("fill", "white");
 
         // scales
         const xScale = scaleLinear()
@@ -242,7 +220,33 @@ class Game {
             this.appendPlayer(playerData, g)
         })
 
+        const svgString = body.html()
+        const fileName = 'tank-tactics-board.png'
+        
+        // create file and post
+        let svgBuffer = Buffer.from(svgString, 'utf-8')
+        let svgSharp = sharp(svgBuffer)
+            .toFormat('png')
+            .toBuffer()
+            .then(data => {
+                // const attachmentFromBuffer = new MessageAttachment(data, {
+                //     id: SnowflakeUtil.generate(),
+                //     filename: fileName,
+                //     description: 'Tank Tactics Board Update',
+                //     media_type: 'image'
+                // })
 
+                discordMsg.channel.send({ files: [ data ] })
+                .then(res => {
+                    console.log(res)
+                })
+                .catch(err => {
+                    console.log(err)
+                })
+            })
+            .catch(err => {
+                console.log("sharp image failed:", err)
+            })
 
 
     }
@@ -270,14 +274,14 @@ class Game {
             .attr('d', `M0,${heartH} A1,2 140 0 1 0,0 A1,2 40 0 1 0,${heartH}`)
             .attr('fill', 'red')
 
-        let arc = d3.arc()
+        let arcPath = arc()
             .innerRadius(0)
             .outerRadius(w/2 - textMargin)
             .startAngle(0)
             .endAngle(Math.PI*2 * (1 - health / 3));
         heart.append('path')
             .attr('transform', `translate(${textMargin-3},${fontSize + textMargin-5})`)
-            .attr('d', arc)
+            .attr('d', arcPath)
             .attr('fill', color)
 
         // name

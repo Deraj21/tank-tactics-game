@@ -57,8 +57,8 @@
   - ~~create smiley svg~~
   - ~~learn how to convert smiley to png~~
   - ~~post smiley on discord~~
-  - generate svg game board (with dummy data)
-  - get bot to post board with dummy data
+  - ~~generate svg game board (with dummy data)~~
+  - ~~get bot to post board with dummy data~~
   - replace dummy data with 'real' data
 - **Testing!:**
   - get rachel to try a bunch of commands and rough test stuff out
