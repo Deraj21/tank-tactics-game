@@ -64,7 +64,14 @@
   - get rachel to try a bunch of commands and rough test stuff out
   - ask her to try and break it
 ### Replit Database
-- convert functions over to use database to persist data
+- create replit database
+    - `match( string )` grabs all db elements that match given string, and returns them in an object
+        - ex: `match("/players/deraj21")` or `match("/gameSettings")`
+    - `getGameSettings()`
+    - `getPlayers()`
+    - `getPlayer( username )`
+    - `setGameSetting( setting )`
+- convert functions over to use database
 - test test test
 ### post-mvp
 - figure out if I can build svg, convert to png, and then post on discord
