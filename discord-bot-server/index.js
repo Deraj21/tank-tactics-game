@@ -20,19 +20,6 @@ const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
 
-let newPlayerData = {
-    health: 2
-}
-
-
-dbHelper.getVotes()
-    .then(votes => console.log(votes))
-// db.list()
-//     .then(keys => console.log(keys))
-// dbHelper.emptyVotes()
-
-
-
 
 function parseCommand(msg){
     let split = msg.content.split(' ')
@@ -47,8 +34,9 @@ function parseCommand(msg){
         // Admin
         switch(command){
             case "!daily-tokens":
-                Game.giveDailyTokens(...split)
-                msg.reply( Game.printVotes() )
+                let votes = await dbHelper.getVotes()
+                msg.reply( Game.printVotes(votes) )
+                await Game.giveDailyTokens(...split)
                 playersUpdated = true
                 break;
             case "!start-game":
@@ -100,11 +88,13 @@ function parseCommand(msg){
                 shortName = split[0]
             }
 
-            result = Player.join(msg.author.username, shortName)
-            if (catchError(result)){
-                return result
-            }
-            msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
+            return Player.joinGame(msg.author.username, shortName)
+                .then(res => {
+                    msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
+                })
+                .catch(errorCode => {
+                    return errorCode
+                })
             break;
         case "!move":
         case "!m":

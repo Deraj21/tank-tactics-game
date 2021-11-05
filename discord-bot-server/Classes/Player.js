@@ -7,23 +7,29 @@ const Player = {
     /**
      * @param {string} uname - new player's username
      */
-    join: function(uname, shortName){
-        if (dbHelper.getGameStarted()){
-            console.error(Error['004'])
-            return '004'
-        }
+    joinGame: function(uname, shortName){
+        return new Promise((res, rej) => {
 
-        let alreadyJoined = false
-        dbHelper.getPlayers().forEach( p => {
-            if (p.name === uname)
-                alreadyJoined = true
+            const gameStarted = await dbHelper.getGameStarted()
+            if (gameStarted){
+                console.error(Error['004'])
+                reject('004')
+            }
+
+            dbHelper.getPlayers().then(players => {
+                let alreadyJoined = false
+                players.forEach( p => {
+                    if (p.username === uname || p.shortName === shortName)
+                        alreadyJoined = true
+                })
+                if (alreadyJoined){
+                    console.log(Error['012'])
+                    reject('012')
+                }
+
+                dbHelper.createPlayer(uname, shortName).then(player => resolve(player))
+            })
         })
-        if (alreadyJoined){
-            console.log(Error['012'])
-            return '012'
-        }
-
-        dbHelper.createPlayer(uname, shortName)
     },
 
     /**
@@ -32,79 +38,89 @@ const Player = {
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'
      */
     move: function(uname, dir){
-        let player = { ...dbHelper.getPlayer(uname) }
+        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
+        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
+        let player = await dbHelper.getPlayer(uname)
 
-        if (player.actionTokens === 0){
-            console.error(Error['003'])
-            return '003'
-        }
-
-        const playersPos = this.getPlayerPositions()
-
-        // parse string
-        dir = dir.toUpperCase()
-        if (!Utils.DIRECTIONS.includes(dir)){
-            console.error(Error['002'])
-            return '002'
-        }
-        let result = dir.split('')
-        
-        // 1st coord
-        switch (result[0]){
-            case 'N':
-                player.position.r--
-                break;
-            case 'S':
-                player.position.r++
-                break;
-            case 'W':
-                player.position.c--
-                break;
-            case 'E':
-                player.position.c++
-                break;
-            default:
-                break;
-        }
-
-        // 2nd coord
-        switch (result[1]){
-            case 'W':
-                player.position.c--
-                break;
-            case 'E':
-                player.position.c++
-                break;
-            default:
-                break;
-        }
-
-        // check out of bounds
-        if (player.position.r < 0 || player.position.r > Utils.NUM_ROWS-1 || player.position.c < 0 || player.position.c > Utils.NUM_COLS-1){
-            console.error(Error['001'])
-            return '001'
-        }
-
-        // check ran into other players
-        let ranIntoPlayer = false
-        playersPos.forEach(playerPos => {
-            let pos = playerPos.position
-            if (playerPos.name === player.name){
-                return
-            } else if (pos.r === player.position.r && pos.c === player.position.c){
-                ranIntoPlayer = true
-                return
+        return new Promise((res, rej) => {
+            if (player.actionTokens === 0){
+                console.error(Error['003'])
+                rej('003')
             }
-        })
-        if (ranIntoPlayer){
-            console.error(Error['008'])
-            return '008'
-        }
 
-        player.actionTokens--
-        dbHelper.updatePlayer(uname, {
-            actionTokens: player.actionTokens,
-            position: { ...player.position }
+            // parse string
+            dir = dir.toUpperCase()
+            if (!Utils.DIRECTIONS.includes(dir)){
+                console.error(Error['002'])
+                rej('002')
+            }
+            let result = dir.split('')
+            
+            // 1st coord
+            switch (result[0]){
+                case 'N':
+                    player.position.r--
+                    break;
+                case 'S':
+                    player.position.r++
+                    break;
+                case 'W':
+                    player.position.c--
+                    break;
+                case 'E':
+                    player.position.c++
+                    break;
+                default:
+                    break;
+            }
+
+            // 2nd coord
+            switch (result[1]){
+                case 'W':
+                    player.position.c--
+                    break;
+                case 'E':
+                    player.position.c++
+                    break;
+                default:
+                    break;
+            }
+
+            // check out of bounds
+            if (player.position.r < 0 || player.position.r > NUM_ROWS-1 || player.position.c < 0 || player.position.c > NUM_COLS-1){
+                console.error(Error['001'])
+                rej('001')
+            }
+            
+            // check ran into other players
+            dbHelper.getPlayerPositions()
+                .then(playersPos => {
+                    let ranIntoPlayer = false
+                    playersPos.forEach(playerPos => {
+                        let pos = playerPos.position
+                        if (playerPos.name === player.name){
+                            return
+                        } else if (pos.r === player.position.r && pos.c === player.position.c){
+                            ranIntoPlayer = true
+                            return
+                        }
+                    })
+                    if (ranIntoPlayer){
+                        console.error(Error['008'])
+                        rej('008')
+                    }
+
+                    player.actionTokens--
+                    dbHelper.updatePlayer(uname, {
+                        actionTokens: player.actionTokens,
+                        position: { ...player.position }
+                    })
+                    .then(response => res(response))
+                    .catch(err => rej(err) )
+                })
+                .catch(err => {
+                    rej(err)
+                })
         })
     },
 
@@ -114,6 +130,7 @@ const Player = {
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
      * @param {boolean} isShooting - is player shooting or gifting an action point
      */
+    //////// need to update for database /////////////////////////////////
     shoot: function(uname, coords, isShooting = true){
         let player = dbHelper.getPlayer(uname)
         let { range, position, actionTokens } = player
@@ -260,20 +277,6 @@ const Player = {
 
         dbHelper.updateVote(voterUname, recipientUname)
     },
-    
-    /**
-     * get all player positions from db
-     * @returns {Object} - player positions
-     */
-    getPlayerPositions: function(){
-        return dbHelper.getPlayers().map(p => {
-            return {
-                name: p.name,
-                position: p.position
-            }
-        })
-    },
-
     /**
      * printInfo - prints out a players info
      * @param {Object} player - player info that will be printed

@@ -18,8 +18,6 @@ const dom = new JSDOM('<!DOCTYPE html><body></body>'),
         top:    20,
         bottom: 5
     },
-    NUM_COLS = 10,
-    NUM_ROWS = 10,
     ROW_NAMES = ['A','B','C','D','E','F','G','H','I','J'],
     innerW = W - margin.left - margin.right,
     innerH = H - margin.top - margin.bottom,
@@ -40,54 +38,62 @@ const Game = {
     },
     randomizePlayerPositions: function(){
         // create flat array of all coordinates
+        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
+        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
         let coords = []
-        for (let r = 0; r < Utils.NUM_ROWS; r++){
-            for (let c = 0; c < Utils.NUM_COLS; c++){
+        for (let r = 0; r < NUM_ROWS; r++){
+            for (let c = 0; c < NUM_COLS; c++){
                 coords.push(r + '-' + c)
             }
         }
 
         // get players
-        let players = dbHelper.getPlayers().map(player => {
-            // for each player, splice coordinate from the list
-            let coordinates = Utils.randomFromList(coords).split('-')
-            player.position.r = parseInt(coordinates[0])
-            player.position.c = parseInt(coordinates[1])
+        dbHelper.getPlayers().then(players => {
+            players.forEach(player => {
+                // for each player, splice coordinate from the list
+                let coordinates = Utils.randomFromList(coords).split('-')
+                player.position.r = parseInt(coordinates[0])
+                player.position.c = parseInt(coordinates[1])
 
-            return player
+                dbHelper.updatePlayer(player.username, player)
+            })
         })
-
-        // update database
-        dbHelper.updatePlayers(players)
     },
-    giveDailyTokens: function(numTokens = 1){
-        // tally votes
-        let votes = dbHelper.getVotes()
-        let tally = {}
-        for (let key in votes){
-            if (tally[votes[key]]){
-                tally[votes[key]]++
-            } else {
-                tally[votes[key]] = 1
-            }
-        }
-        
-        dbHelper.getPlayers().forEach(player => {
-            if (!player.isDead){
-                player.actionTokens += parseInt(numTokens)
-                if (tally[player.name] >= 3){
-                    player.actionTokens += parsInt(numTokens)
+    giveDailyTokens: function(){
+        return new Promise((resolve, reject) => {
+            let numTokens = await dbHelper.getGameSetting('daily_token_count')
+            let votes = await dbHelper.getVotes()
+
+            let tally = {}
+            for (let key in votes){
+                if (tally[votes[key]]){
+                    tally[votes[key]]++
+                } else {
+                    tally[votes[key]] = 1
                 }
-                dbHelper.updatePlayer(player.name, { actionTokens: player.actionTokens })
             }
+            
+            dbHelper.getPlayers().then(players => {
+                players.forEach(player => {
+                    if (!player.isDead){
+                        player.actionTokens += parseInt(numTokens)
+                        if (tally[player.username] >= 3){
+                            player.actionTokens += parsInt(numTokens)
+                        }
+                        await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
+                    }
+                })
+
+                // 'forget' votes
+                dbHelper.emptyVotes()
+            })
+
+            resolve()
         })
 
-        // 'forget' votes
-        dbHelper.emptyVotes()
-    },
-    printVotes: function(){
-        let votes = dbHelper.getVotes()
 
+    },
+    printVotes: function(votes){
         let tally = {}
         for (let key in votes){
             if (tally[votes[key]]){
@@ -102,23 +108,26 @@ const Game = {
             text += `${key}: ${tally[key]}\n`
         }
 
-        console.log(text)
         return text
     },
     printBoard: function(small = false){
         // create board
+        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
+        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
+        const players = await dbHelper.getPlayers()
+
         let board = []
         let healths = {}
-        for (let r = 0; r < Utils.NUM_ROWS; r++){
+        for (let r = 0; r < NUM_ROWS; r++){
             let row = []
-            for (let c = 0; c < Utils.NUM_COLS; c++){
+            for (let c = 0; c < NUM_COLS; c++){
                 row.push(small ? '.' : '   ')
             }
 
             board.push(row)
         }
         // place 'tanks'
-        dbHelper.getPlayers().forEach(p => {
+        players.forEach(p => {
             if (p.isDead){
                 return
             }
@@ -132,18 +141,18 @@ const Game = {
 
         // column labels
         let text = small ? ' ' : ' '
-        for (let i = 0; i < Utils.NUM_COLS; i++){
+        for (let i = 0; i < NUM_COLS; i++){
             text += small ? ` ${i}` : `   ${i}`
         }
         text += '\n'
         if (!small){
-            text += "  " + " _ _".repeat(Utils.NUM_COLS) + "\n"
+            text += "  " + " _ _".repeat(NUM_COLS) + "\n"
         }
 
         // rows
         board.forEach((row, r) => {
             // text += ''
-            text += Utils.ROW_NAMES[r] + ' '
+            text += ROW_NAMES[r] + ' '
             if (small){
                 text += row.join(' ') + '\n'
             } else {
@@ -163,9 +172,11 @@ const Game = {
      * @param {Message} - discordMsg
      */
     postBoard(discordMsg){
-        const players = this.db.getPlayers()
+        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
+        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
+        const players = await dbHelper.getPlayers()
 
-        // 
+        // svg
         const body = select(dom.window.document.querySelector('body'))
         const svg = body.append('svg')
             .attr('height', H)
@@ -299,53 +310,18 @@ const Game = {
     postSmiley: function(discordMsg){
         const svgString = `
         <svg id="smiley2" height="200" width="200">
-            <circle cx="100" cy="100" r="100" fill="green" stroke="black" />
+            <circle cx="100" cy="100" r="100" fill="gold" stroke="black" />
             <g id="eyes" transform="translate(100 60)">
                 <circle cx="-40" r="10" fill="black" />
                 <circle cx="40" r="10" fill="black" />
             </g>
             <path stroke="black" fill="none" stroke-width="5px" d="M 50 100 A 50 50 0 0 0 150 100"/>
         </svg>`
-    
-        // setup body
-        let body = select(dom.window.document.querySelector('body'))
         
-        // build svg
-        let svg = body.append('svg')
-            .attr('height', 200)
-            .attr('width',  200)
-        
-        let circle = svg.append('circle')
-            .attr('cx', 100)
-            .attr('cy', 100)
-            .attr('r', 100)
-            .attr('fill', 'gold')
-            .attr('stroke', 'black')
-        
-        const eyesTrans = { x: 100, y: 60 }
-        let eyes = svg.append('g')
-            .attr('transform', `translate(${eyesTrans.x}, ${eyesTrans.y}`)
-            .attr('stroke', 'black')
-        
-        let eyeTranslations = [40, -40]
-        eyeTranslations.forEach(cx => {
-            eyes.append('circle')
-                .attr('cx', cx)
-                .attr('r', 10)
-                .attr('fill', 'black')
-        })
-        
-        let mouth = svg.append('path')
-            .attr('d', 'M 50 100 A 50 50 0 0 0 150 100')
-            .attr('stroke', 'black')
-            .attr('fill', 'none')
-            .attr('stroke-width', 5)
-            
-        const svgString2 = body.html()
         const fileName = 'smile-test.png'
         
         // create file
-        let svgBuffer = Buffer.from(svgString2, 'utf-8')
+        let svgBuffer = Buffer.from(svgString, 'utf-8')
         let svgSharp = sharp(svgBuffer)
             .toFormat('png')
             .toBuffer()

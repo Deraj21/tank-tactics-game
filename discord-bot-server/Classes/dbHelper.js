@@ -70,6 +70,19 @@ const dbHelper = {
     getPlayers: function(){
         return this.getListObject('player.', true)
     },
+    getPlayerPositions: function(){
+        return new Promise((res, rej) => {
+            this.getPlayers().then(players => {
+                let playerPositions = players.map(p => {
+                    return {
+                        name: p.name,
+                        position: p.position
+                    }
+                })
+                res(playerPositions)
+            }).catch(err => rej(err))
+        })
+    },
     updatePlayer: function(username, payload){
         return this.getPlayer(username).then(player => {
             let newPlayer = Object.assign({}, player, payload)
@@ -92,11 +105,11 @@ const dbHelper = {
             .catch(err => {
                 console.log(err)
             })
-    }
+    },
     emptyVotes:   function(){ this.empty('vote.')   },
     emptyPlayers: function(){ this.empty('player.') },
     getGameStarted: function(){ return db.get(`game.game_started`) },
-    setGameStarted: function(bool){ return db.set`game.game_started`, bool) },
+    setGameStarted: function(bool){ return db.set(`game.game_started`, bool) },
     resetGame: function(){
         this.emptyPlayers()
         this.emptyVotes()
