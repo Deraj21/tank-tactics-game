@@ -2,112 +2,105 @@ import Utils from './Utilities.js'
 import Error from './ErrorCodes.js'
 import Database from "@replit/database"
 const db = new Database()
-/* database 'schema' *
-
-/game/<game_variable>
-    /game_started
-
-/game_setting/<setting_name>
-    /num_cols
-    /num_rows
-    /starting_health
-    /starting_tokens
-    /daily_token_count
-    /starting_range
-
-/player/<player_id>/<player_attribute>
-    /username
-    /nickname
-    /health
-    /action_tokens
-    /range
-    /position
-    /color
-    /is_dead
 
 
-getGameSettings()
-getPlayers()
-getPlayer( username )
-setGameSetting( setting )
-
-*/
 const dbHelper = {
+    getListObject: function(string, isArr = false){
+        return new Promise((resolve, reject) => {
+            return db.list(string)
+                .then(keys => {
+                    let result = isArr ? [] : {}
+                    for (let i = 0; i < keys.length; i++){
+                        db.get(keys[i]).then(value => {
+                            let key = keys[i].split('.')[1]
+                            if (isArr){
+                                result.push(value)
+                            } else {
+                                result[key] = value
+                            }
+
+                            if ((isArr ? result.length : Object.keys(result).length) === keys.length){
+                                console.log('result', result)
+                                resolve(result)
+                            }
+                        })
+                    }
+                    resolve(result)
+                })
+                .catch(err => { reject(err) })
+        })
+    },
     setGameSetting: function(settingName, value){
         // validate correct data type
-
         // validate setting exists
             // if doesn't exist, tell user they are creating new
             // else put into database
 
-
+        return db.set(`game_setting.${settingName}`, value)
     },
     getGameSettings: function(){
-        
+        return this.getListObject("game_setting.")
     },
     getGameSetting: function(settingName){
-
+        return db.get(`game_setting.${settingName}`)
     },
+    /**
+     * @param {string} username
+     * @param {string} shortName
+     */
     createPlayer: function(username, shortName){
-        let newPlayer = {
-            name: username,
-            shortName: shortName,
-            health: 3,
-            actionTokens: 0,
-            range: 2,
-            position: { r: 0, c: 0 },
-            color: Utils.hashRGB(username),
-            isDead: false
-        }
-        this.players.push(newPlayer)
-        
+        return this.getGameSettings().then(settings => {
+            let { starting_health, starting_range, starting_tokens } = settings
+            db.set(`player.${username}`, {
+                name: username,
+                shortName: shortName,
+                health: starting_health,
+                actionTokens: starting_tokens,
+                range: starting_range,
+                position: { r: 0, c: 0 },
+                color: Utils.hashRGB(username),
+                isDead: false
+            })
+        })
+        .catch(err => console.log(err))
     },
     getPlayer: function(username){
-        let p = this.players.find(p => p.name === username)
-        if (p !== null){
-            // immutable data
-            return Object.assign({}, p, { position: { ...p.position } })
-        } else {
-            return null
-        }
+        return db.get(`player.${username}`)
     },
     getPlayers: function(){
-        // immutible data
-        return this.players.map(p => {
-            return Object.assign({}, p, { position: { ...p.position } })
-        })
+        return this.getListObject('player.', true)
     },
     updatePlayer: function(username, payload){
-        let i = this.players.findIndex(p => p.name === username)
-        let player = { ...this.players[i] }
-        this.players[i] = Object.assign({}, player, payload)
-    },
-    updatePlayers: function(playerData){
-        this.players = [ ...playerData ]
+        return this.getPlayer(username).then(player => {
+            let newPlayer = Object.assign({}, player, payload)
+            console.log(newPlayer)
+
+            return db.set(`player.${username}`, newPlayer)
+        })
     },
     updateVote: function(voter, recipient){
-        this.votes[voter] = recipient
+        return db.set(`vote.${voter}`, recipient)
     },
     getVotes: function(){
-        return { ...this.votes }
+        return this.getListObject('vote.')
     },
-    emptyVotes: function(){
-        for (let key in this.votes){
-            delete this.votes[key]
-        }
-    },
-    getGameStarted: function(){
-        return this.gameStarted
-    },
-    setGameStarted: function(bool){
-        this.gameStarted = bool
-    },
+    empty: function(matchString){
+        db.list(matchString)
+            .then(keys => {
+                keys.forEach(k => db.delete(k))
+            })
+            .catch(err => {
+                console.log(err)
+            })
+    }
+    emptyVotes:   function(){ this.empty('vote.')   },
+    emptyPlayers: function(){ this.empty('player.') },
+    getGameStarted: function(){ return db.get(`game.game_started`) },
+    setGameStarted: function(bool){ return db.set`game.game_started`, bool) },
     resetGame: function(){
-        this.players.length = 0
+        this.emptyPlayers()
         this.emptyVotes()
-        this.gameStarted = false
-
-        this.addTestData()
+        this.setGameStarted(false)
     }
 }
 

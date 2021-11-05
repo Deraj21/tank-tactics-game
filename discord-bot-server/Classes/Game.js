@@ -1,5 +1,5 @@
 import Utils from './Utilities.js'
-import dbHelper from './dbHelper'
+import dbHelper from './dbHelper.js'
 import jsdom from 'jsdom'
 import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
@@ -157,7 +157,7 @@ const Game = {
         })
 
         return text
-    }
+    },
 
     /**
      * @param {Message} - discordMsg

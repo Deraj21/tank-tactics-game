@@ -1,6 +1,8 @@
 // node modules
 import dotenv from 'dotenv'
 import Discord from "discord.js"
+import Database from "@replit/database"
+const db = new Database()
 
 // my modules
 import Game from "./Classes/Game.js"
@@ -17,6 +19,19 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
+
+let newPlayerData = {
+    health: 2
+}
+
+
+dbHelper.getVotes()
+    .then(votes => console.log(votes))
+// db.list()
+//     .then(keys => console.log(keys))
+// dbHelper.emptyVotes()
+
+
 
 
 function parseCommand(msg){
@@ -157,34 +172,32 @@ client.on('ready', () => {
     console.log(`Logged in as ${client.user.tag}!`)
 })
 
-client.on('messageCreate', msg => {
-    if (msg.author.bot) return;
-
+// client.on('messageCreate', msg => {
+//     if (msg.author.bot) return;
     
-    if (msg.channel.name === "call-out-moves") {
-        if (msg.content.match(/^\!.*/)){ // starts with !
-            let res = parseCommand(msg)
-            if (catchError(res)){
-                msg.reply(Error[res])
-            }
-        }
+//     if (msg.channel.name === "call-out-moves") {
+//         if (msg.content.match(/^\!.*/)){ // starts with !
+//             let res = parseCommand(msg)
+//             if (catchError(res)){
+//                 msg.reply(Error[res])
+//             }
+//         }
+//         if (msg.content === "!ping"){
+//             msg.reply("pong")
+//         }
+//     } else if (msg.channel.type === "DM") {
+//         msg.author.send("You are DMing me now!")
+//     }
 
-        if (msg.content === "!ping"){
-            msg.reply("pong")
-        }
-    } else if (msg.channel.type === "DM") {
-        msg.author.send("You are DMing me now!")
-    }
-
-})
+// })
 
 
-// Bot log in
-client.login(DISCORD_TOKEN)
-    .then(res => {
-        console.log(res)
-    })
-    .catch(err => {
-        console.log(err)
-    })
+// // Bot log in
+// client.login(DISCORD_TOKEN)
+//     .then(res => {
+//         console.log(res)
+//     })
+//     .catch(err => {
+//         console.log(err)
+//     })
 

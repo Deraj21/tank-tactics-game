@@ -18,8 +18,12 @@
   },
   "homepage": "https://github.com/Deraj21/tank-tactics-game#readme",
   "dependencies": {
+    "@replit/database": "^2.0.1",
+    "d3": "^7.1.1",
     "discord.js": "^13.2.0",
-    "dotenv": "^10.0.0"
+    "dotenv": "^10.0.0",
+    "jsdom": "^18.0.1",
+    "sharp": "^0.29.2"
   },
   "devDependencies": {
     "node": "^16.13.0"
