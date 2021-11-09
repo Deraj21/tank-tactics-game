@@ -1,8 +1,20 @@
+const   H = 600,
+        W = 600,
+        margin = {
+            left:   20,
+            right:  5,
+            top:    20,
+            bottom: 5
+        }
+
 export default {
-    NUM_ROWS: 10,
-    NUM_COLS: 10,
-    ROW_NAMES: ['A','B','C','D','E','F','G','H','I','J'],
+    ROW_NAMES: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
     DIRECTIONS: ['N','S','W','E','NW','SW','NE','SE'],
+    H: H,
+    W: W,
+    margin: margin,
+    innerH: H - margin.top - margin.bottom,
+    innerW: W - margin.left - margin.right,
 
     // takes any string, and hashes it into rgb values
     hashRGB: function (str, lighten = true){
@@ -57,13 +69,13 @@ export default {
 
     getDeathMessage() {
         return this.randomFromList([
-            "Is no longer with us.",
-            "Has gone the way of all the earth.",
-            "Un-alived.",
-            "Kicked the bucket.",
-            "Just think of it as they're being let go.",
-            "Their life is going in a different direction.",
-            "Their tank is part of a permanent outplacement."
+            " is no longer with us.",
+            " has gone the way of all the earth.",
+            " has un-alived.",
+            " kicked the bucket.",
+            " is being let go.",
+            "'s life is going in a different direction.",
+            "'s tank is part of a permanent outplacement."
         ])
     }
 }

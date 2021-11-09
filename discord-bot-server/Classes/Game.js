@@ -5,38 +5,26 @@ import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
 import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
-const { hashRGB } = Utils
+const { hashRGB, H, W, margin, innerW, innerH } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
-const dom = new JSDOM('<!DOCTYPE html><body></body>'),
-    H = 600,
-    W = H,
-    margin = {
-        left:   20,
-        right:  5,
-        top:    20,
-        bottom: 5
-    },
-    ROW_NAMES = ['A','B','C','D','E','F','G','H','I','J'],
-    innerW = W - margin.left - margin.right,
-    innerH = H - margin.top - margin.bottom,
-    w = innerW / NUM_COLS,
-    h = innerH / NUM_ROWS
-
+const dom = new JSDOM('<!DOCTYPE html><body></body>')
 
 /**
  * Game
  */
 const Game = {
+    //////////// TESTING /////////////////////////////////////////////
     startGame: function(){
-        dbHelper.setGameStarted(true)
-        this.randomizePlayerPositions()
+        return dbHelper.setGameStarted(true).then(res => {
+            return this.randomizePlayerPositions()
+        })
     },
     resetGame: function(){
         dbHelper.resetGame()
     },
-    randomizePlayerPositions: function(){
+    randomizePlayerPositions: async function(){
         // create flat array of all coordinates
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
@@ -60,7 +48,7 @@ const Game = {
         })
     },
     giveDailyTokens: function(){
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
             let numTokens = await dbHelper.getGameSetting('daily_token_count')
             let votes = await dbHelper.getVotes()
 
@@ -74,7 +62,7 @@ const Game = {
             }
             
             dbHelper.getPlayers().then(players => {
-                players.forEach(player => {
+                players.forEach(async player => {
                     if (!player.isDead){
                         player.actionTokens += parseInt(numTokens)
                         if (tally[player.username] >= 3){
@@ -110,7 +98,7 @@ const Game = {
 
         return text
     },
-    printBoard: function(small = false){
+    printBoard: async function(small = false){
         // create board
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
@@ -171,7 +159,7 @@ const Game = {
     /**
      * @param {Message} - discordMsg
      */
-    postBoard(discordMsg){
+    postBoard: async function(discordMsg){
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
         const players = await dbHelper.getPlayers()
@@ -254,7 +242,11 @@ const Game = {
 
 
     },
-    appendPlayer: function(data, g){
+    appendPlayer: async function(data, g){
+        const { NUM_COLS, NUM_ROWS } = await dbHelper.getBoardStats()
+        const   w = innerW / NUM_COLS,
+                h = innerH / NUM_ROWS
+
         const { name, shortName, health, actionTokens, range, position, color, isDead } = data
         const textMargin = 3,
             fontSize = 12,

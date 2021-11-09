@@ -8,8 +8,7 @@ const Player = {
      * @param {string} uname - new player's username
      */
     joinGame: function(uname, shortName){
-        return new Promise((res, rej) => {
-
+        return new Promise(async (res, rej) => {
             const gameStarted = await dbHelper.getGameStarted()
             if (gameStarted){
                 console.error(Error['004'])
@@ -37,7 +36,7 @@ const Player = {
      * @param {string} uname - username of player doing the action
      * @param {string} dir - cardinal direction i.e 'S' or 'NW'
      */
-    move: function(uname, dir){
+    move: async function(uname, dir){
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         let player = await dbHelper.getPlayer(uname)
@@ -131,7 +130,7 @@ const Player = {
      * @param {boolean} isShooting - is player shooting or gifting an action point
      */
     //////// need to update for database /////////////////////////////////
-    shoot: function(uname, coords, isShooting = true){
+    shoot: async function(uname, coords, isShooting = true){
         let player = dbHelper.getPlayer(uname)
         let { range, position, actionTokens } = player
         let { r, c } = position
@@ -196,7 +195,7 @@ const Player = {
      * takeDamage - take 1 health from player, and check if dead
      * @param {string} uname - username of player taking damage
      */
-    takeDamage: function(uname){
+    takeDamage: async function(uname){
         let player = dbHelper.getPlayer(uname)
         player.health--
         

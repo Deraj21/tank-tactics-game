@@ -20,12 +20,11 @@ const dbHelper = {
                             }
 
                             if ((isArr ? result.length : Object.keys(result).length) === keys.length){
-                                console.log('result', result)
                                 resolve(result)
                             }
                         })
                     }
-                    resolve(result)
+                    // resolve(result)
                 })
                 .catch(err => { reject(err) })
         })
@@ -44,6 +43,18 @@ const dbHelper = {
     getGameSetting: function(settingName){
         return db.get(`game_setting.${settingName}`)
     },
+    getBoardStats: function(){
+        return new Promise((resolve, reject) => {
+            this.getGameSettings().then(settings => {
+                resolve({
+                    NUM_ROWS: settings.num_rows,
+                    NUM_COLS: settings.num_cols
+                })
+            }).catch(err => {
+                reject(err)
+            })
+        })
+    },
     /**
      * @param {string} username
      * @param {string} shortName
@@ -52,7 +63,7 @@ const dbHelper = {
         return this.getGameSettings().then(settings => {
             let { starting_health, starting_range, starting_tokens } = settings
             db.set(`player.${username}`, {
-                name: username,
+                username: username,
                 shortName: shortName,
                 health: starting_health,
                 actionTokens: starting_tokens,
@@ -114,6 +125,13 @@ const dbHelper = {
         this.emptyPlayers()
         this.emptyVotes()
         this.setGameStarted(false)
+    },
+    setDummyData: function(){
+        // players
+        const usernames = ['deraj21', 'AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo']
+        usernames.forEach(name => {
+            this.createPlayer(name, name.slice(0, 6))
+        })
     }
 }
 

@@ -21,7 +21,32 @@ const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
 
 
-function parseCommand(msg){
+// db.list().then(keys => {
+    
+//     keys.forEach(key => {
+//         db.get(key).then(value => console.log({key, value}))
+//     })
+// })
+
+
+// await Game.startGame()
+// console.log('game started')
+// const board = await Game.printBoard()
+// console.log(board)
+
+// await dbHelper.setDummyData()
+console.log('first')
+dbHelper.getPlayers().then(players => {
+    console.log('hi', players)
+    // console.log(
+    //     players.map(p => {
+    //         return `${p.username}: (${p.position.r}, ${p.position.c})`
+    //     })
+    // )
+})
+
+
+async function parseCommand(msg){
     let split = msg.content.split(' ')
     let command = split.shift().toLowerCase()
     let boardUpdated = false
@@ -158,9 +183,9 @@ function parseCommand(msg){
 
 /////////
 // EVENTS
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`)
-})
+// client.on('ready', () => {
+//     console.log(`Logged in as ${client.user.tag}!`)
+// })
 
 // client.on('messageCreate', msg => {
 //     if (msg.author.bot) return;
