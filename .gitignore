@@ -1,3 +1,6 @@
-.replit
-.nix
 .env
+
+/node_modules
+
+.nix
+.replit

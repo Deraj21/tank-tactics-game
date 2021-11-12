@@ -1,32 +1,23 @@
 {
-  "name": "tank-tactics-game",
+  "name": "tank-tactics-discord-bot",
   "version": "1.0.0",
+  "description": "",
   "main": "index.js",
+  "type": "module",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node discord-bot-server/index.js"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Deraj21/tank-tactics-game.git"
+    "start": "node index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Deraj21/tank-tactics-game/issues"
-  },
-  "homepage": "https://github.com/Deraj21/tank-tactics-game#readme",
   "dependencies": {
     "@replit/database": "^2.0.1",
     "d3": "^7.1.1",
-    "discord.js": "^13.2.0",
+    "discord.js": "^13.0.1",
     "dotenv": "^10.0.0",
     "jsdom": "^18.0.1",
+    "node": "^16.13.0",
     "sharp": "^0.29.2"
-  },
-  "devDependencies": {
-    "node": "^16.13.0"
-  },
-  "description": ""
+  }
 }
