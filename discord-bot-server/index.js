@@ -13,7 +13,7 @@ import Utilities from "./Classes/Utilities.js"
 import dbHelper from "./Classes/dbHelper.js"
 
 // setup
-const { catchError } = Utilities
+const { catchError, shortNameLength } = Utilities
 const { Intents, Client } = Discord
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
 const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
@@ -45,7 +45,7 @@ async function parseCommand(msg){
             case "!start-game":
             case "!start":
                 ///////// TESTING //////////////////////////////////
-                Game.startGame()
+                await Game.startGame()
                 boardUpdated = true;
     
                 break;
@@ -53,6 +53,17 @@ async function parseCommand(msg){
             case "!reset":
                 msg.reply("game has been reset. players can join until the game starts")
                 Game.resetGame()
+                break;
+            case "!add-test-data":
+                dbHelper.setDummyData()
+                    .then(res => {
+                        msg.reply('test data set')
+                        console.log(res)
+                    })
+                    .catch(err => {
+                        msg.reply('test data failed')
+                        console.log(err)
+                    })
                 break;
             case "!get-players": // for debugging
                 playersUpdated = true
@@ -67,8 +78,11 @@ async function parseCommand(msg){
                 //     msg.channel
                 // )
                 break;
-            case "!smile":
+            case "!get-board":
                 Game.postBoard(msg);
+                break;
+            case "!debug":
+
                 break;
             default:
                 invalidCommand = true
@@ -83,11 +97,11 @@ async function parseCommand(msg){
             // get shortName
             let shortName = ""
             if (split[0] === undefined || split[0] === ""){
-                shortName = msg.author.username.split('').splice(0, 3).join('')
-            } else if (split[0].length < 3) {
-                shortName = split[0] + ".".repeat(3 - split[0].length)
-            } else if (split[0].length > 3){
-                shortName = split[0].split('').splice(0, 3).join('')
+                shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
+            } else if (split[0].length < shortNameLength) {
+                shortName = split[0] + ".".repeat(shortNameLength - split[0].length)
+            } else if (split[0].length > shortNameLength){
+                shortName = split[0].split('').splice(0, shortNameLength).join('')
             } else {
                 shortName = split[0]
             }
@@ -146,7 +160,7 @@ async function parseCommand(msg){
             if (invalidCommand){
                 msg.reply("`" + msg.content + "` is not a valid command.")
                     .then(res => {
-                        console.log(msg)
+                        // console.log(msg)
                         // msg.delete()
                     })
                     .catch(err => {
@@ -159,10 +173,11 @@ async function parseCommand(msg){
     if (boardUpdated){
         Game.postBoard(msg)
     } else if (playersUpdated){
-        console.log('players updated')
         const playersData = await dbHelper.getPlayers()
+        if (playersData.length){
+            msg.reply( Player.printPlayers(playersData) )
+        }
         console.log(playersData)
-        msg.reply( Player.printPlayers(playersData) )
     }
 }
 

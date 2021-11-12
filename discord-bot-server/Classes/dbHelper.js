@@ -71,7 +71,6 @@ const dbHelper = {
      * @param {string} shortName
      */
     createPlayer: function(username, shortName){
-        console.log(username)
         return this.getGameSettings().then(settings => {
             let { starting_health, starting_range, starting_tokens } = settings
             db.set(`player.${username}`, {
@@ -139,12 +138,17 @@ const dbHelper = {
         this.setGameStarted(false)
     },
     setDummyData: function(){
-        // players
-        const usernames = ['deraj21', 'AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo']
-        usernames.forEach(name => {
-            this.createPlayer(name, name.slice(0, 6))
-                .then(res => console.log(name + " created"))
-                .catch(err => console.log(err))
+        return new Promise((resolve, reject) => {
+
+            const usernames = ['deraj21', 'AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo']
+            
+            usernames.forEach(async (name, i) => {
+                const response = await this.createPlayer(name, name.slice(0, 6))
+                console.log(`${name} created (${i}, ${usernames.length - 1})`)
+                if (i >= usernames.length - 1){
+                    resolve(response)
+                }
+            })
         })
     }
 }

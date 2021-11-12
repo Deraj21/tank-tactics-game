@@ -211,8 +211,8 @@ const Game = {
             .attr('transform', `translate(${innerW / NUM_COLS / 2},0)`)
 
         // players (tanks)
-        players.forEach(playerData => {
-            this.appendPlayer(playerData, g)
+        players.forEach(player => {
+            this.appendPlayer(player, g, NUM_COLS, NUM_ROWS)
         })
 
         const svgString = body.html()
@@ -224,6 +224,7 @@ const Game = {
             .toFormat('png')
             .toBuffer()
             .then(data => {
+                // console.log(data)
                 // const attachmentFromBuffer = new MessageAttachment(data, {
                 //     id: SnowflakeUtil.generate(),
                 //     filename: fileName,
@@ -233,7 +234,7 @@ const Game = {
 
                 discordMsg.channel.send({ files: [ data ] })
                 .then(res => {
-                    console.log(res)
+                    // console.log(res)
                 })
                 .catch(err => {
                     console.log(err)
@@ -245,12 +246,11 @@ const Game = {
 
 
     },
-    appendPlayer: async function(data, g){
-        const { NUM_COLS, NUM_ROWS } = await dbHelper.getBoardStats()
+    appendPlayer: async function(data, g, NUM_COLS, NUM_ROWS){
         const   w = innerW / NUM_COLS,
                 h = innerH / NUM_ROWS
 
-        const { name, shortName, health, actionTokens, range, position, color, isDead } = data
+        const { username, shortName, health, actionTokens, range, position, color, isDead } = data
         const textMargin = 3,
             fontSize = 12,
             heartH = h / 2.5,
@@ -284,7 +284,7 @@ const Game = {
 
         // name
         let nameElm = player.append('text')
-            .text(name)
+            .text(shortName)
             .attr('transform', `translate(${textMargin},${fontSize + textMargin})`)
             .attr('font-size', fontSize)
 

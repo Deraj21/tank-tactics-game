@@ -6,6 +6,7 @@
 - [TODO](#todo)
   - [Node server Todo](#node-server-todo)
   - [Replit Database](#replit-database)
+  - [BUGS](#bugs)
   - [post-mvp](#post-mvp-1)
 - [Useful Links](#useful-links)
 
@@ -73,15 +74,16 @@
     - ~~`setGameSetting( setting )`~~
 - convert functions over to use database
   - ~~game class~~
-  - test
   - player class
-  - test
   - index.js
-  - test
+  - test!
+### BUGS
+- on 1st generation of the board, it posts fine, but on subsequent attempts, sharp.js comes back with this error:
+  - "Input buffer has corrupt header: glib: XML parse error: Error domain 1 code 5 on line 1 column 7546 of data: Extra content at the end of the document"
+  - it doesn't happen when resetting the server between !get-board commands
 ### post-mvp
-- figure out if I can build svg, convert to png, and then post on discord
 - Admin
-  - game-setting
+  - game-settings
   - remove-player
 
 ---

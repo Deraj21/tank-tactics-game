@@ -282,17 +282,17 @@ const Player = {
      * @param {boolean} long - print in long form?
      */
     printInfo: function(player, long = false){
-        let { name, shortName, health, actionTokens, range, position, color, isDead } = player
+        let { username, shortName, health, actionTokens, range, position, color, isDead } = player
         let { r, c } = position
         if (long){
-            return  `-- **${shortName} (${name})${isDead ? ": Juror" : ""}** --\n` + 
+            return  `-- **${shortName} (${username})${isDead ? ": Juror" : ""}** --\n` + 
                     `health:       ${health}\n` + 
                     `range:        ${range}\n` + 
                     `actionTokens: ${actionTokens}\n` + 
                     `position:     [${r}, ${c}]\n` + 
                     `color:        ${color}\n`
         } else {
-            return `**${shortName}** (${name}):   ` +
+            return `**${shortName}** (${username}):   ` +
             (isDead ? Utils.getDeathMessage() + "\n" : `${health} hp,  ${range} range,  ${actionTokens} tokens\n`)
         }
     },

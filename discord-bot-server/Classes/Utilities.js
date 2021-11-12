@@ -15,6 +15,7 @@ export default {
     margin: margin,
     innerH: H - margin.top - margin.bottom,
     innerW: W - margin.left - margin.right,
+    shortNameLength: 6,
 
     // takes any string, and hashes it into rgb values
     hashRGB: function (str, lighten = true){
