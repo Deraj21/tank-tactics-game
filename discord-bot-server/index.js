@@ -1,8 +1,9 @@
 // node modules
 import dotenv from 'dotenv'
+dotenv.config()
 import Discord from "discord.js"
 import Database from "@replit/database"
-const db = new Database()
+const db = new Database(process.env.REPLIT_DB_URL)
 
 // my modules
 import Game from "./Classes/Game.js"
@@ -12,7 +13,6 @@ import Utilities from "./Classes/Utilities.js"
 import dbHelper from "./Classes/dbHelper.js"
 
 // setup
-dotenv.config()
 const { catchError } = Utilities
 const { Intents, Client } = Discord
 const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGES, Intents.FLAGS.DIRECT_MESSAGES] });
@@ -20,30 +20,6 @@ const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
 
-
-// db.list().then(keys => {
-    
-//     keys.forEach(key => {
-//         db.get(key).then(value => console.log({key, value}))
-//     })
-// })
-
-
-// await Game.startGame()
-// console.log('game started')
-// const board = await Game.printBoard()
-// console.log(board)
-
-// await dbHelper.setDummyData()
-console.log('first')
-dbHelper.getPlayers().then(players => {
-    console.log('hi', players)
-    // console.log(
-    //     players.map(p => {
-    //         return `${p.username}: (${p.position.r}, ${p.position.c})`
-    //     })
-    // )
-})
 
 
 async function parseCommand(msg){
@@ -59,13 +35,16 @@ async function parseCommand(msg){
         // Admin
         switch(command){
             case "!daily-tokens":
+            case "!dt":
                 let votes = await dbHelper.getVotes()
                 msg.reply( Game.printVotes(votes) )
-                await Game.giveDailyTokens(...split)
-                playersUpdated = true
+                let result = await Game.giveDailyTokens(...split)
+                
+                msg.reply( Player.printPlayers(result) )
                 break;
             case "!start-game":
             case "!start":
+                ///////// TESTING //////////////////////////////////
                 Game.startGame()
                 boardUpdated = true;
     
@@ -160,6 +139,9 @@ async function parseCommand(msg){
             msg.reply(`player ${msg.author.username} is voting for ${split.join(' ')}`)
             msg.author.send('You can start dming me now')
             break;
+        case "!ping":
+            msg.reply("pong!")
+            break;
         default:
             if (invalidCommand){
                 msg.reply("`" + msg.content + "` is not a valid command.")
@@ -175,44 +157,44 @@ async function parseCommand(msg){
     }
 
     if (boardUpdated){
-        game.postBoard(msg)
+        Game.postBoard(msg)
     } else if (playersUpdated){
-        msg.reply( Player.printPlayers() )
+        console.log('players updated')
+        const playersData = await dbHelper.getPlayers()
+        console.log(playersData)
+        msg.reply( Player.printPlayers(playersData) )
     }
 }
 
 /////////
 // EVENTS
-// client.on('ready', () => {
-//     console.log(`Logged in as ${client.user.tag}!`)
-// })
+client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`)
+})
 
-// client.on('messageCreate', msg => {
-//     if (msg.author.bot) return;
+client.on('messageCreate', msg => {
+    if (msg.author.bot) return;
     
-//     if (msg.channel.name === "call-out-moves") {
-//         if (msg.content.match(/^\!.*/)){ // starts with !
-//             let res = parseCommand(msg)
-//             if (catchError(res)){
-//                 msg.reply(Error[res])
-//             }
-//         }
-//         if (msg.content === "!ping"){
-//             msg.reply("pong")
-//         }
-//     } else if (msg.channel.type === "DM") {
-//         msg.author.send("You are DMing me now!")
-//     }
+    if (msg.channel.name === "call-out-moves") {
+        if (msg.content.match(/^\!.*/)){ // starts with !
+            let res = parseCommand(msg)
+            if (catchError(res)){
+                msg.reply(Error[res])
+            }
+        }
+    } else if (msg.channel.type === "DM") {
+        msg.author.send("You are DMing me now!")
+    }
 
-// })
+})
 
 
-// // Bot log in
-// client.login(DISCORD_TOKEN)
-//     .then(res => {
-//         console.log(res)
-//     })
-//     .catch(err => {
-//         console.log(err)
-//     })
+// Bot log in
+client.login(DISCORD_TOKEN)
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
 

@@ -1,3 +1,5 @@
+import dotenv from 'dotenv'
+dotenv.config()
 import Utils from './Utilities.js'
 import Error from './ErrorCodes.js'
 import Database from "@replit/database"
@@ -9,10 +11,17 @@ const dbHelper = {
         return new Promise((resolve, reject) => {
             return db.list(string)
                 .then(keys => {
+                    // console.log(keys)
                     let result = isArr ? [] : {}
-                    for (let i = 0; i < keys.length; i++){
+                    let i = 0
+                    do {
+                        let key = keys[i] ? keys[i].split('.')[1] : null
+                        if (key === null) {
+                            resolve(result)
+                            return
+                        }
                         db.get(keys[i]).then(value => {
-                            let key = keys[i].split('.')[1]
+                            
                             if (isArr){
                                 result.push(value)
                             } else {
@@ -22,9 +31,11 @@ const dbHelper = {
                             if ((isArr ? result.length : Object.keys(result).length) === keys.length){
                                 resolve(result)
                             }
+
                         })
-                    }
-                    // resolve(result)
+
+                        i++
+                    } while (i < keys.length)
                 })
                 .catch(err => { reject(err) })
         })
@@ -60,6 +71,7 @@ const dbHelper = {
      * @param {string} shortName
      */
     createPlayer: function(username, shortName){
+        console.log(username)
         return this.getGameSettings().then(settings => {
             let { starting_health, starting_range, starting_tokens } = settings
             db.set(`player.${username}`, {
@@ -79,6 +91,7 @@ const dbHelper = {
         return db.get(`player.${username}`)
     },
     getPlayers: function(){
+        
         return this.getListObject('player.', true)
     },
     getPlayerPositions: function(){
@@ -97,7 +110,6 @@ const dbHelper = {
     updatePlayer: function(username, payload){
         return this.getPlayer(username).then(player => {
             let newPlayer = Object.assign({}, player, payload)
-            console.log(newPlayer)
 
             return db.set(`player.${username}`, newPlayer)
         })
@@ -131,6 +143,8 @@ const dbHelper = {
         const usernames = ['deraj21', 'AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo']
         usernames.forEach(name => {
             this.createPlayer(name, name.slice(0, 6))
+                .then(res => console.log(name + " created"))
+                .catch(err => console.log(err))
         })
     }
 }

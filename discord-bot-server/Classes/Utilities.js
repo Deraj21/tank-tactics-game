@@ -47,7 +47,9 @@ export default {
         if (lighten){
             const lightenFactor = .6 // closer to 1 = closer to white
             const max = 255
-            let [rl,gl,bl] = [r,g,b].map(color => color + ((max - color) * lightenFactor))
+            let [rl,gl,bl] = [r,g,b].map(color => {
+                return Math.floor(color + ((max - color) * lightenFactor))
+            })
 
             return `RGB(${rl},${gl},${bl})`
         } else {

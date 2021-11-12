@@ -5,7 +5,7 @@ import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
 import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
-const { hashRGB, H, W, margin, innerW, innerH } = Utils
+const { hashRGB, H, W, margin, innerW, innerH, ROW_NAMES } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
@@ -15,8 +15,13 @@ const dom = new JSDOM('<!DOCTYPE html><body></body>')
  * Game
  */
 const Game = {
-    //////////// TESTING /////////////////////////////////////////////
-    startGame: function(){
+    startGame: async function(){
+        const gameHasStarted = await dbHelper.getGameStarted()
+        if (gameHasStarted){
+            console.log('game has already started')
+            return
+        }
+
         return dbHelper.setGameStarted(true).then(res => {
             return this.randomizePlayerPositions()
         })
@@ -61,22 +66,20 @@ const Game = {
                 }
             }
             
-            dbHelper.getPlayers().then(players => {
-                players.forEach(async player => {
-                    if (!player.isDead){
-                        player.actionTokens += parseInt(numTokens)
-                        if (tally[player.username] >= 3){
-                            player.actionTokens += parsInt(numTokens)
-                        }
-                        await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
+            let players = await dbHelper.getPlayers()
+            players.forEach(async player => {
+                if (!player.isDead){
+                    player.actionTokens += parseInt(numTokens)
+                    if (tally[player.username] >= 3){
+                        player.actionTokens += parsInt(numTokens)
                     }
-                })
-
-                // 'forget' votes
-                dbHelper.emptyVotes()
+                    await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
+                }
             })
 
-            resolve()
+            // 'forget' votes
+            await dbHelper.emptyVotes()
+            resolve(players)
         })
 
 

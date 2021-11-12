@@ -22,7 +22,7 @@ const Player = {
                         alreadyJoined = true
                 })
                 if (alreadyJoined){
-                    console.log(Error['012'])
+                    console.error(Error['012'])
                     reject('012')
                 }
 
@@ -97,7 +97,7 @@ const Player = {
                     let ranIntoPlayer = false
                     playersPos.forEach(playerPos => {
                         let pos = playerPos.position
-                        if (playerPos.name === player.name){
+                        if (playerPos.username === player.username){
                             return
                         } else if (pos.r === player.position.r && pos.c === player.position.c){
                             ranIntoPlayer = true
@@ -301,13 +301,8 @@ const Player = {
      * printPlayers - prints info of multiple players
      * @param  {...string} unames - array of player names to print; if empty, will print all players
      */
-    printPlayers: function(...unames){
-        if (unames.length === 0){
-            // print all
-            return dbHelper.getPlayers().map( p => this.printInfo(p) ).join("")
-        } else {
-            return unames.map(uname => this.printInfo( dbHelper.getPlayer(uname) )).join("")
-        }
+    printPlayers: function(players){
+        return players.map( p => this.printInfo(p) ).join("")
     },
 }
 
