@@ -1,10 +1,10 @@
-const   H = 600,
-        W = 600,
+const   H = 1200,
+        W = 1200,
         margin = {
-            left:   20,
-            right:  5,
-            top:    20,
-            bottom: 5
+            left:   40,
+            right:  10,
+            top:    40,
+            bottom: 10
         }
 
 export default {
@@ -15,7 +15,9 @@ export default {
     margin: margin,
     innerH: H - margin.top - margin.bottom,
     innerW: W - margin.left - margin.right,
+    fontSize: W / 50,
     shortNameLength: 6,
+
 
     // takes any string, and hashes it into rgb values
     hashRGB: function (str, lighten = true){

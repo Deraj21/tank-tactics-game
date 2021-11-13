@@ -73,7 +73,7 @@ const dbHelper = {
     createPlayer: function(username, shortName){
         return this.getGameSettings().then(settings => {
             let { starting_health, starting_range, starting_tokens } = settings
-            db.set(`player.${username}`, {
+            return db.set(`player.${username}`, {
                 username: username,
                 shortName: shortName,
                 health: starting_health,

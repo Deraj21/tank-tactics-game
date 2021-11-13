@@ -44,31 +44,39 @@ async function parseCommand(msg){
                 break;
             case "!start-game":
             case "!start":
-                ///////// TESTING //////////////////////////////////
-                await Game.startGame()
-                boardUpdated = true;
-    
+                Game.startGame()
+                .then(res => {
+                    console.log(res)
+                    Game.postBoard(msg)
+                })
+                .catch(err => {
+                    console.log(err)
+                    msg.reply(err)
+                })
+                
+                
                 break;
             case "!reset-game":
             case "!reset":
-                msg.reply("game has been reset. players can join until the game starts")
+                msg.reply("Game has been reset. Players can join until the game starts")
                 Game.resetGame()
                 break;
             case "!add-test-data":
+            case "!test-data":
                 dbHelper.setDummyData()
                     .then(res => {
                         msg.reply('test data set')
-                        console.log(res)
                     })
                     .catch(err => {
                         msg.reply('test data failed')
                         console.log(err)
                     })
                 break;
-            case "!get-players": // for debugging
+            case "!get-players":
                 playersUpdated = true
                 break;
             case "!get-votes":
+                ///////// TESTING //////////////////////////////////
                 console.log("getting votes")
                 msg.reply( Game.printVotes() )
                 break;
@@ -176,8 +184,10 @@ async function parseCommand(msg){
         const playersData = await dbHelper.getPlayers()
         if (playersData.length){
             msg.reply( Player.printPlayers(playersData) )
+        } else {
+            console.log(Error['014'])
+            msg.reply(Error['014'])
         }
-        console.log(playersData)
     }
 }
 

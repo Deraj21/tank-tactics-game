@@ -1,54 +1,64 @@
 import Utils from './Utilities.js'
 import dbHelper from './dbHelper.js'
+import Error from './ErrorCodes.js'
 import jsdom from 'jsdom'
 import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
 import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
-const { hashRGB, H, W, margin, innerW, innerH, ROW_NAMES } = Utils
+const { hashRGB, H, W, margin, innerW, innerH, fontSize, ROW_NAMES } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
-const dom = new JSDOM('<!DOCTYPE html><body></body>')
 
 /**
  * Game
  */
 const Game = {
     startGame: async function(){
-        const gameHasStarted = await dbHelper.getGameStarted()
-        if (gameHasStarted){
-            console.log('game has already started')
-            return
-        }
-
-        return dbHelper.setGameStarted(true).then(res => {
-            return this.randomizePlayerPositions()
+        return new Promise(async (resolve, reject) => {
+            const gameHasStarted = await dbHelper.getGameStarted()
+            if (gameHasStarted){
+                reject(Error['013'])
+            }
+    
+            dbHelper.setGameStarted(true).then(res => {
+                this.randomizePlayerPositions().then(posRes => {
+                    resolve(posRes)
+                })
+            })
+            .catch(err => {reject(err)})
         })
     },
     resetGame: function(){
         dbHelper.resetGame()
     },
     randomizePlayerPositions: async function(){
-        // create flat array of all coordinates
-        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
-        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
-        let coords = []
-        for (let r = 0; r < NUM_ROWS; r++){
-            for (let c = 0; c < NUM_COLS; c++){
-                coords.push(r + '-' + c)
+        return new Promise(async (resolve, reject) => {
+            // create flat array of all coordinates
+            const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
+            const NUM_COLS = await dbHelper.getGameSetting('num_cols')
+            let coords = []
+            for (let r = 0; r < NUM_ROWS; r++){
+                for (let c = 0; c < NUM_COLS; c++){
+                    coords.push(r + '-' + c)
+                }
             }
-        }
-
-        // get players
-        dbHelper.getPlayers().then(players => {
-            players.forEach(player => {
-                // for each player, splice coordinate from the list
-                let coordinates = Utils.randomFromList(coords).split('-')
-                player.position.r = parseInt(coordinates[0])
-                player.position.c = parseInt(coordinates[1])
-
-                dbHelper.updatePlayer(player.username, player)
+    
+            // get players
+            dbHelper.getPlayers().then(players => {
+                players.forEach(async (player, i) => {
+                    // for each player, splice coordinate from the list
+                    let coordinates = Utils.randomFromList(coords).split('-')
+                    player.position.r = parseInt(coordinates[0])
+                    player.position.c = parseInt(coordinates[1])
+    
+                    await dbHelper.updatePlayer(player.username, player)
+    
+                    if (i === players.length - 1){
+                        resolve(players)
+                    }
+                })
             })
         })
     },
@@ -166,6 +176,7 @@ const Game = {
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
         const players = await dbHelper.getPlayers()
+        const dom = new JSDOM('<!DOCTYPE html><body></body>')
 
         // svg
         const body = select(dom.window.document.querySelector('body'))
@@ -203,11 +214,13 @@ const Game = {
         // yAxis
         const yAxisG = g.append('g').call(yAxis)
         yAxisG.selectAll('text')
+            .attr('font-size', fontSize)
             .attr('transform', `translate(0,${innerH / NUM_ROWS / 2})`)
 
         // xAxis
         const xAxisG = g.append('g').call(xAxis)
         xAxisG.selectAll('text')
+            .attr('font-size', fontSize)
             .attr('transform', `translate(${innerW / NUM_COLS / 2},0)`)
 
         // players (tanks)
@@ -233,12 +246,9 @@ const Game = {
                 // })
 
                 discordMsg.channel.send({ files: [ data ] })
-                .then(res => {
-                    // console.log(res)
-                })
-                .catch(err => {
-                    console.log(err)
-                })
+                    .catch(err => {
+                        console.log(err)
+                    })
             })
             .catch(err => {
                 console.log("sharp image failed:", err)
@@ -251,8 +261,7 @@ const Game = {
                 h = innerH / NUM_ROWS
 
         const { username, shortName, health, actionTokens, range, position, color, isDead } = data
-        const textMargin = 3,
-            fontSize = 12,
+        const textMargin = H / 200,
             heartH = h / 2.5,
             tokenW = w / 6
         let addZero = n => n = n < 10 ? '0'+n : ""+n

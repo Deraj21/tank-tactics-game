@@ -78,9 +78,8 @@
   - index.js
   - test!
 ### BUGS
-- on 1st generation of the board, it posts fine, but on subsequent attempts, sharp.js comes back with this error:
-  - "Input buffer has corrupt header: glib: XML parse error: Error domain 1 code 5 on line 1 column 7546 of data: Extra content at the end of the document"
-  - it doesn't happen when resetting the server between !get-board commands
+- ~~on 1st generation of the board, it posts fine, but on subsequent attempts, sharp.js comes back with error~~
+- ...
 ### post-mvp
 - Admin
   - game-settings
