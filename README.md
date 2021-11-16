@@ -5,7 +5,7 @@
 - [Questions](#questions)
 - [TODO](#todo)
   - [Node server Todo](#node-server-todo)
-  - [Replit Database](#replit-database)
+  - [Testing](#testing)
   - [BUGS](#bugs)
   - [post-mvp](#post-mvp-1)
 - [Useful Links](#useful-links)
@@ -38,51 +38,28 @@
 ---
 
 ## Questions
-- How do I visualize the board?
-  - **Discord bot sends ASCII-art** messages as replies to commands
-    - PROs: low-effort and self-contained; everything is done within discord
-    - CONs: not great looking; not super easy to read, might cause confusion
-  - **Create separate website** hosted on replit that reads the database, and displays the board
-    - PROS: medium-effort, code is mostly written; I can make it look as pretty as I want
-    - CONS: not self-contained (you have to leave discord to view web page)
-  - **Discord bot creates and posts images**
-    - PROS: I can make it very pretty & readable; not need to leave Discord to view board
-    - CONS: *not* low effort; I'm not even sure if it's possible with the tools I have
+- How do I visualize the board: **Discord bot creates and posts images**
+  - PROS: I can make it very pretty & readable; not need to leave Discord to view board
+  - CONS: *not* low effort; I'm not even sure if it's possible with the tools I have
 - How do I properly test this game?
 
 ---
 
 ## TODO
 ### Node server Todo
-- **Generating & posting the game Board**
-  - ~~create smiley svg~~
-  - ~~learn how to convert smiley to png~~
-  - ~~post smiley on discord~~
-  - ~~generate svg game board (with dummy data)~~
-  - ~~get bot to post board with dummy data~~
-  - replace dummy data with 'real' data
-- **Testing!:**
-  - get rachel to try a bunch of commands and rough test stuff out
-  - ask her to try and break it
-### Replit Database
-- create replit database
-    - ~~`match( string )` grabs all db elements that match given string, and returns them in an object~~
-        - ~~ex: `match("/players/deraj21")` or `match("/gameSettings")`~~
-    - ~~`getPlayers()`~~
-    - ~~`getGameSettings()`~~
-    - ~~`getPlayer( username )`~~
-    - ~~`setGameSetting( setting )`~~
-- convert functions over to use database
-  - ~~game class~~
-  - player class
-  - index.js
-  - test!
+- [ ] convert code to use database
+  - [ ] upgrade range
+  - [ ] vote
+  - [ ] test awarding daily tokens base on votes
+- [ ] validate setting exists when updating game setting, and correct datatype
+### Testing
+  - [ ] get rachel to try a bunch of commands and rough test stuff out
+  - [ ] ask her to try and break it
 ### BUGS
-- ~~on 1st generation of the board, it posts fine, but on subsequent attempts, sharp.js comes back with error~~
 - ...
 ### post-mvp
 - Admin
-  - game-settings
+  - add new game settings
   - remove-player
 
 ---

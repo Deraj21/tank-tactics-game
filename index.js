@@ -158,6 +158,7 @@ async function parseCommand(msg){
                 break;
             case "!upgrade-range":
             case "!ur":
+                /// NEED TO TEST //////////////////////
                 result = Player.upgradeRange(msg.author.username)
                 if (catchError(result)){
                     return result
