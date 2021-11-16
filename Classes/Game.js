@@ -6,7 +6,7 @@ import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
 import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
-const { hashRGB, H, W, margin, innerW, innerH, fontSize, ROW_NAMES } = Utils
+const { hashRGB, H, W, margin, innerW, innerH, fontSize, ROW_NAMES, maxHealth } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
@@ -95,6 +95,10 @@ const Game = {
 
     },
     printVotes: function(votes){
+        if ( !Object.keys(votes).length ){
+            return "No one has voted yet!"
+        }
+
         let tally = {}
         for (let key in votes){
             if (tally[votes[key]]){
@@ -107,6 +111,15 @@ const Game = {
         let text = "Vote Tallies:\n"
         for (let key in tally){
             text += `${key}: ${tally[key]}\n`
+        }
+
+        return text
+    },
+    printSettings: function(settings){
+        let text = "**__ Game Settings __**\n"
+
+        for (let key in settings){
+            text += `${key} = ${settings[key]}\n`
         }
 
         return text
@@ -259,15 +272,18 @@ const Game = {
     appendPlayer: async function(data, g, NUM_COLS, NUM_ROWS){
         const   w = innerW / NUM_COLS,
                 h = innerH / NUM_ROWS
-
-        const { username, shortName, health, actionTokens, range, position, color, isDead } = data
         const textMargin = H / 200,
             heartH = h / 2.5,
             tokenW = w / 6
-        let addZero = n => n = n < 10 ? '0'+n : ""+n
+        const addZero = n => n = n < 10 ? '0'+n : ""+n
+        const { username, shortName, health, actionTokens, range, position, color, isDead } = data
+
+        if (isDead){
+            return
+        }
 
         let player = g.append('g')
-            .attr('transform', `translate(${position.r * w-1},${position.c * h-1})`)
+            .attr('transform', `translate(${position.c * w-1},${position.r * h-1})`)
         
         let tank = player.append('rect')
             .attr('fill', color)
@@ -276,21 +292,28 @@ const Game = {
             .attr('width', w)
 
         let heart = player.append('g')
-            .attr('transform', `translate(${w/2},${fontSize + 2*textMargin + 3})`)
+            .attr('transform', `translate(${w/2},${fontSize + 2.5*textMargin})`)
         heart.append('path')
             .attr('d', `M0,${heartH} A1,2 140 0 1 0,0 A1,2 40 0 1 0,${heartH}`)
             .attr('fill', 'red')
-
+            
         let arcPath = arc()
             .innerRadius(0)
             .outerRadius(w/2 - textMargin)
             .startAngle(0)
             .endAngle(Math.PI*2 * (1 - health / 3));
         heart.append('path')
-            .attr('transform', `translate(${textMargin-3},${fontSize + textMargin-5})`)
+            .attr('transform', `translate(${0},${textMargin*2.5})`)
             .attr('d', arcPath)
             .attr('fill', color)
-
+            // .attr('stroke', 'black')
+        
+        heart.append('path')
+            .attr('d', `M0,${heartH} A1,2 140 0 1 0,0 A1,2 40 0 1 0,${heartH}`)
+            .attr('fill', 'none')
+            .attr('stroke', 'black')
+            .attr('stroke-width', textMargin / 2)
+            
         // name
         let nameElm = player.append('text')
             .text(shortName)

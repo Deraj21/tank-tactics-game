@@ -8,11 +8,11 @@ const Player = {
      * @param {string} uname - new player's username
      */
     joinGame: function(uname, shortName){
-        return new Promise(async (res, rej) => {
+        return new Promise(async (resolve, reject) => {
             const gameStarted = await dbHelper.getGameStarted()
             if (gameStarted){
-                console.error(Error['004'])
                 reject('004')
+                return
             }
 
             dbHelper.getPlayers().then(players => {
@@ -22,8 +22,8 @@ const Player = {
                         alreadyJoined = true
                 })
                 if (alreadyJoined){
-                    console.error(Error['012'])
                     reject('012')
+                    return
                 }
 
                 dbHelper.createPlayer(uname, shortName).then(player => resolve(player))
@@ -41,17 +41,15 @@ const Player = {
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         let player = await dbHelper.getPlayer(uname)
 
-        return new Promise((res, rej) => {
+        return new Promise((resolve, reject) => {
             if (player.actionTokens === 0){
-                console.error(Error['003'])
-                rej('003')
+                reject('003')
             }
 
             // parse string
             dir = dir.toUpperCase()
             if (!Utils.DIRECTIONS.includes(dir)){
-                console.error(Error['002'])
-                rej('002')
+                reject('002')
             }
             let result = dir.split('')
             
@@ -87,8 +85,7 @@ const Player = {
 
             // check out of bounds
             if (player.position.r < 0 || player.position.r > NUM_ROWS-1 || player.position.c < 0 || player.position.c > NUM_COLS-1){
-                console.error(Error['001'])
-                rej('001')
+                reject('001')
             }
             
             // check ran into other players
@@ -105,8 +102,7 @@ const Player = {
                         }
                     })
                     if (ranIntoPlayer){
-                        console.error(Error['008'])
-                        rej('008')
+                        reject('008')
                     }
 
                     player.actionTokens--
@@ -114,11 +110,11 @@ const Player = {
                         actionTokens: player.actionTokens,
                         position: { ...player.position }
                     })
-                    .then(response => res(response))
-                    .catch(err => rej(err) )
+                    .then(response => resolve(response))
+                    .catch(err => reject(err) )
                 })
                 .catch(err => {
-                    rej(err)
+                    reject(err)
                 })
         })
     },
@@ -130,85 +126,75 @@ const Player = {
      * @param {boolean} isShooting - is player shooting or gifting an action point
      */
     //////// need to update for database /////////////////////////////////
-    shoot: async function(uname, coords, isShooting = true){
-        let player = dbHelper.getPlayer(uname)
+    shoot: async function(uname, coords, isShooting = true, numTokens){
+        let player = await dbHelper.getPlayer(uname)
         let { range, position, actionTokens } = player
         let { r, c } = position
 
-        if (actionTokens < 1){
-            console.error(Error['003'])
-            return '003'
-        }
-
-        if (!coords){
-            console.error(Error['009'])
-            return '009'
-        }
-
-        // parse coordinates
-        coords = coords ? coords.toUpperCase() : ""
-        let splitCoords = coords.split('')
-        
-        // check valid coordinates
-        let row = Utils.ROW_NAMES.findIndex((name, i) => {
-            return name === splitCoords[0]
-        })
-        if (splitCoords.length > 2 || row === -1 || splitCoords[1].match(/\d/) === null){
-            console.error(Error['009'])
-            return '009'
-        }
-        let col = parseInt(splitCoords[1])
-
-        // check sufficient range
-        if (Math.abs(row - r) > range || Math.abs(col - c) > range){
-            console.error(Error['010'])
-            return '010'
-        }
-
-        // check player at coordinates - '011'
-        let playerPositions = this.getPlayerPositions()
-        let hitPlayer = ""
-        playerPositions.forEach(pos => {
-            if (pos.position.r === row && pos.position.c === col){
-                hitPlayer = pos.name
+        return new Promise(async (resolve, reject) => {
+            if (actionTokens < 1){
+                reject('003')
             }
-        })
-        if (!hitPlayer){
-            console.error(Error['011'])
-            return '011'
-        }
-        
-        // have player take damage
-        if (isShooting){
-            this.takeDamage(hitPlayer)
-        } else {
-            this.receiveToken(hitPlayer)
-        }
-
-        // remove action token
-        player.actionTokens--
-
-        dbHelper.updatePlayer(uname, player)
-    },
-
-    /**
-     * takeDamage - take 1 health from player, and check if dead
-     * @param {string} uname - username of player taking damage
-     */
-    takeDamage: async function(uname){
-        let player = dbHelper.getPlayer(uname)
-        player.health--
-        
-        // check death
-        if (player.health <= 0){
-            player.isDead = true
-            player.position = { r: -1, c: -1 }
-        }
-        
-        dbHelper.updatePlayer(uname, {
-            health: player.health,
-            isDead: player.isDead,
-            position: { ...player.position }
+            if (!coords){
+                reject('009')
+            }
+    
+            // parse coordinates
+            coords = coords ? coords.toUpperCase() : ""
+            let splitCoords = coords.split('')
+            
+            // check valid coordinates
+            let row = Utils.ROW_NAMES.findIndex((name, i) => {
+                return name === splitCoords[0]
+            })
+            if (splitCoords.length > 2 || row === -1 || splitCoords[1].match(/\d/) === null){
+                reject('009')
+            }
+            let col = parseInt(splitCoords[1])
+    
+            // check sufficient range
+            if (Math.abs(row - r) > range || Math.abs(col - c) > range){
+                reject('010')
+            }
+    
+            // check player at coordinates
+            let playerPositions = await dbHelper.getPlayers()
+            let hitPlayer = null
+            playerPositions.forEach(pos => {
+                if (!pos.isDead && pos.position.r === row && pos.position.c === col){
+                    hitPlayer = pos
+                }
+            })
+            if (hitPlayer === null){
+                reject('011')
+            }
+            
+            // have player take damage
+            if (isShooting){
+                hitPlayer.health--
+                // check death
+                if (hitPlayer.health <= 0){
+                    hitPlayer.isDead = true
+                    hitPlayer.position = { r: -1, c: -1 }
+                }
+                player.actionTokens--
+            } else {
+                hitPlayer.actionTokens += numTokens
+                player.actionTokens -= numTokens
+            }
+    
+            // remove action token
+    
+            dbHelper.updatePlayer(uname, player)
+                .then(res => {
+                    dbHelper.updatePlayer(hitPlayer.username, hitPlayer)
+                        .then(hitRes => resolve({
+                            player,
+                            hitPlayer
+                        }))
+                        .catch(hitErr => reject(hitErr))
+                })
+                .catch(err => reject(err))
         })
     },
 
@@ -217,20 +203,8 @@ const Player = {
      * @param {string} uname - username of player giving the token
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
      */
-    giftActionToken: function(uname, coords){
-        return this.shoot(uname, coords, false)
-    },
-
-    /**
-     * recieveToken - give player an action token
-     * @param {string} uname - username of player recieving token
-     */
-    receiveToken: function(uname){
-        let player = dbHelper.getPlayer(uname)
-        player.actionTokens++
-        dbHelper.updatePlayer(uname, {
-            actionTokens: player.actionTokens
-        })
+    giftActionToken: function(uname, coords, numTokens = 1){
+        return this.shoot(uname, coords, false, parseInt(numTokens))
     },
     
     /**
@@ -303,7 +277,7 @@ const Player = {
      */
     printPlayers: function(players){
         return players.map( p => this.printInfo(p) ).join("")
-    },
+    }
 }
 
 export default Player

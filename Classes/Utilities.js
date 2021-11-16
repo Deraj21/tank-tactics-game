@@ -8,6 +8,7 @@ const   H = 1200,
         }
 
 export default {
+    dummyUsernames: ['AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo'],
     ROW_NAMES: ['A','B','C','D','E','F','G','H','I','J','K','L','M','N','O','P','Q','R','S','T','U','V','W','X','Y','Z'],
     DIRECTIONS: ['N','S','W','E','NW','SW','NE','SE'],
     H: H,
@@ -17,6 +18,7 @@ export default {
     innerW: W - margin.left - margin.right,
     fontSize: W / 50,
     shortNameLength: 6,
+    maxHealth: 3, // eventually make into database game setting
 
 
     // takes any string, and hashes it into rgb values

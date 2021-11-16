@@ -139,13 +139,10 @@ const dbHelper = {
     },
     setDummyData: function(){
         return new Promise((resolve, reject) => {
-
-            const usernames = ['deraj21', 'AbyssalMoth', 'D00mIncarnate', 'PearlHeart', 'ConfusedDoggo']
-            
-            usernames.forEach(async (name, i) => {
+            Utils.dummyUsernames.forEach(async (name, i) => {
                 const response = await this.createPlayer(name, name.slice(0, 6))
-                console.log(`${name} created (${i}, ${usernames.length - 1})`)
-                if (i >= usernames.length - 1){
+                console.log(`${name} created (${i}, ${Utils.dummyUsernames.length - 1})`)
+                if (i >= Utils.dummyUsernames.length - 1){
                     resolve(response)
                 }
             })

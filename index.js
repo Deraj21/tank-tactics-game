@@ -8,9 +8,9 @@ const db = new Database(process.env.REPLIT_DB_URL)
 // my modules
 import Game from "./Classes/Game.js"
 import Player from "./Classes/Player.js"
-import Error from "./Classes/ErrorCodes.js"
 import Utilities from "./Classes/Utilities.js"
 import dbHelper from "./Classes/dbHelper.js"
+import ErrorCodes from './Classes/ErrorCodes.js'
 
 // setup
 const { catchError, shortNameLength } = Utilities
@@ -20,6 +20,7 @@ const DISCORD_TOKEN = process.env['DISCORD_TOKEN']
 const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
 
+let votes
 
 
 async function parseCommand(msg){
@@ -31,164 +32,187 @@ async function parseCommand(msg){
     let isGM = msg.member.roles.cache.some(role => role.name === GM_ROLE)
     let result = ''
 
-    if (isGM){
-        // Admin
+    return new Promise (async (resolve, reject) => {
+        if (isGM){
+            // Admin
+            switch(command){
+                case "!daily-tokens":
+                case "!dt":
+                    votes = await dbHelper.getVotes()
+                    msg.reply( Game.printVotes(votes) )
+                    let result = await Game.giveDailyTokens(...split)
+                    
+                    // msg.reply( Player.printPlayers(result) )
+                    resolve({playersUpdated: true})
+                    break;
+                case "!start-game":
+                case "!start":
+                    Game.startGame()
+                        .then(res => {
+                            console.log(res)
+                            // Game.postBoard(msg)
+                            resolve({boardUpdated: true})
+                        })
+                        .catch(err => {
+                            console.log(err)
+                            msg.reply(err)
+                        })
+                    
+                    
+                    break;
+                case "!reset-game":
+                case "!reset":
+                    msg.reply("Game has been reset. Players can join until the game starts")
+                    Game.resetGame()
+                    break;
+                case "!add-test-data":
+                case "!test-data":
+                    dbHelper.setDummyData()
+                        .then(res => {
+                            msg.reply('test data set')
+                        })
+                        .catch(err => {
+                            msg.reply('test data failed')
+                            console.log(err)
+                        })
+                    break;
+                case "!get-players":
+                    resolve({ playersUpdated: true })
+                    break;
+                case "!get-votes":
+                    votes = await dbHelper.getVotes()
+                    msg.reply( Game.printVotes(votes) )
+                    break;
+                case "!clear-channel": // post-mvp
+                    // msg.reply("Deleting stuff...")
+                    break;
+                case "!get-board":
+                case "!gb":
+                    // Game.postBoard(msg);
+                    resolve({boardUpdated: true})
+                    break;
+                case "!game-setting":
+                    dbHelper.setGameSetting(...split)
+                        .then(res => {
+                            msg.reply(`${split[0]} has been set to ${split[1]}`)
+                        })
+                        .catch(err => console.log(err))
+                    break;
+                case "!get-settings":
+                    dbHelper.getGameSettings()
+                        .then(settings => {
+                            msg.reply( Game.printSettings(settings) )
+                        })
+                    break;
+                default:
+                    invalidCommand = true
+                    break;
+            }
+        }
+    
+        // Players
         switch(command){
-            case "!daily-tokens":
-            case "!dt":
-                let votes = await dbHelper.getVotes()
-                msg.reply( Game.printVotes(votes) )
-                let result = await Game.giveDailyTokens(...split)
-                
-                msg.reply( Player.printPlayers(result) )
-                break;
-            case "!start-game":
-            case "!start":
-                Game.startGame()
-                .then(res => {
-                    console.log(res)
-                    Game.postBoard(msg)
-                })
-                .catch(err => {
-                    console.log(err)
-                    msg.reply(err)
-                })
-                
-                
-                break;
-            case "!reset-game":
-            case "!reset":
-                msg.reply("Game has been reset. Players can join until the game starts")
-                Game.resetGame()
-                break;
-            case "!add-test-data":
-            case "!test-data":
-                dbHelper.setDummyData()
+            case "!join":
+            case "!j":
+                // get shortName
+                let shortName = ""
+                if (split[0] === undefined || split[0] === ""){
+                    shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
+                } else if (split[0].length < shortNameLength) {
+                    shortName = split[0] + ".".repeat(shortNameLength - split[0].length)
+                } else if (split[0].length > shortNameLength){
+                    shortName = split[0].split('').splice(0, shortNameLength).join('')
+                } else {
+                    shortName = split[0]
+                }
+    
+                Player.joinGame(msg.author.username, shortName)
                     .then(res => {
-                        msg.reply('test data set')
+                        msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
+                    })
+                    .catch(code => {
+                        msg.reply( ErrorCodes[code] )
+                    })
+                break;
+            case "!move":
+            case "!m":
+                Player.move(msg.author.username, ...split)
+                    .then(response => {
+                        resolve({ boardUpdated: true })
+                    })
+                    .catch(code => {
+                        msg.reply(ErrorCodes[code])
+                    })
+                
+                break;
+            case "!shoot":
+            case "!s":
+                Player.shoot(msg.author.username, split[0])
+                    .then(res => {
+                        msg.reply(`${res.player.shortName} shot ${res.hitPlayer.shortName}`)
+                        resolve({boardUpdated: true})
+                    })
+                    .catch(code => {
+                        msg.reply(ErrorCodes[code])
+                    })
+                break;
+            case "!upgrade-range":
+            case "!ur":
+                result = Player.upgradeRange(msg.author.username)
+                if (catchError(result)){
+                    return result
+                }
+                boardUpdated = true
+                break;
+            case "!gift-token":
+            case "!gt":
+                Player.giftActionToken(msg.author.username, ...split)
+                    .then(res => {
+                        msg.reply(`${res.player.shortName} gifted a token to ${res.hitPlayer.shortName}`)
                     })
                     .catch(err => {
-                        msg.reply('test data failed')
-                        console.log(err)
+                        
                     })
+                boardUpdated = true
                 break;
-            case "!get-players":
-                playersUpdated = true
+            case "!vote":
+            case "!v":
+                /// NEED TO TEST //////////////////////
+                result = Player.vote(msg.author.username, ...split)
+                msg.reply(`player ${msg.author.username} is voting for ${split.join(' ')}`)
+                msg.author.send('You can start dming me now')
                 break;
-            case "!get-votes":
-                ///////// TESTING //////////////////////////////////
-                console.log("getting votes")
-                msg.reply( Game.printVotes() )
-                break;
-            case "!clear-channel":
-                msg.reply("Deleting stuff...")
-                // console.log(
-                //     msg.channel
-                // )
-                break;
-            case "!get-board":
-                Game.postBoard(msg);
-                break;
-            case "!debug":
-
+            case "!ping":
+                msg.reply("pong!")
                 break;
             default:
-                invalidCommand = true
+                if (invalidCommand){
+                    msg.reply("`" + msg.content + "` is not a valid command.")
+                        .then(res => {
+                            // console.log(msg)
+                            // msg.delete()
+                        })
+                        .catch(err => {
+                            console.log(err)
+                        })
+                }
                 break;
         }
-    }
-
-    // Players
-    switch(command){
-        case "!join":
-        case "!j":
-            // get shortName
-            let shortName = ""
-            if (split[0] === undefined || split[0] === ""){
-                shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
-            } else if (split[0].length < shortNameLength) {
-                shortName = split[0] + ".".repeat(shortNameLength - split[0].length)
-            } else if (split[0].length > shortNameLength){
-                shortName = split[0].split('').splice(0, shortNameLength).join('')
-            } else {
-                shortName = split[0]
-            }
-
-            return Player.joinGame(msg.author.username, shortName)
-                .then(res => {
-                    msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
-                })
-                .catch(errorCode => {
-                    return errorCode
-                })
-            break;
-        case "!move":
-        case "!m":
-            result = Player.move(msg.author.username, ...split)
-            if (catchError(result)){
-                return result
-            }
-            boardUpdated = true
-            
-            break;
-        case "!shoot":
-        case "!s":
-            result = Player.shoot(msg.author.username, split[0])
-            if (catchError(result)){
-                return result
-            }
-            boardUpdated = true
-            break;
-        case "!upgrade-range":
-        case "!ur":
-            result = Player.upgradeRange(msg.author.username)
-            if (catchError(result)){
-                return result
-            }
-            boardUpdated = true
-            break;
-        case "!gift-token":
-        case "!gt":
-            result = Player.giftActionToken(msg.author.username, ...split)
-            if (catchError(result)){
-                return result
-            }
-            boardUpdated = true
-            break;
-        case "!vote":
-        case "!v":
-            result = Player.vote(msg.author.username, ...split)
-            msg.reply(`player ${msg.author.username} is voting for ${split.join(' ')}`)
-            msg.author.send('You can start dming me now')
-            break;
-        case "!ping":
-            msg.reply("pong!")
-            break;
-        default:
-            if (invalidCommand){
-                msg.reply("`" + msg.content + "` is not a valid command.")
-                    .then(res => {
-                        // console.log(msg)
-                        // msg.delete()
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
-            }
-            break;
-    }
-
-    if (boardUpdated){
-        Game.postBoard(msg)
-    } else if (playersUpdated){
-        const playersData = await dbHelper.getPlayers()
-        if (playersData.length){
-            msg.reply( Player.printPlayers(playersData) )
-        } else {
-            console.log(Error['014'])
-            msg.reply(Error['014'])
+    }).then(async res => {
+        if (res.boardUpdated){
+            Game.postBoard(msg)
         }
-    }
+        if (res.playersUpdated){
+            const playersData = await dbHelper.getPlayers()
+            if (playersData.length){
+                msg.reply( Player.printPlayers(playersData) )
+            } else {
+                console.log(ErrorCodes['014'])
+                msg.reply(ErrorCodes['014'])
+            }
+        }
+    })
+
 }
 
 /////////
@@ -202,10 +226,7 @@ client.on('messageCreate', msg => {
     
     if (msg.channel.name === "call-out-moves") {
         if (msg.content.match(/^\!.*/)){ // starts with !
-            let res = parseCommand(msg)
-            if (catchError(res)){
-                msg.reply(Error[res])
-            }
+            parseCommand(msg)
         }
     } else if (msg.channel.type === "DM") {
         msg.author.send("You are DMing me now!")
