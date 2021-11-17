@@ -52,13 +52,13 @@ It's actaully a really fascinating story, and inspired me to create a discord-bo
 ## Game Rules & how to play
 ### Setup
 - Use the `!join` command to join the game. Once the game has started, players can no longer join.
-- Each player plays as a tank on a board of squares
+- Each player plays as a 'tank' on a board of squares
 - At the start of the game, each player's tank is randomly placed on the board, and starts with the following:
   - 3 health
   - 1 action token
   - A range of 2
 ### Playing the Game
-- To perform actions, a player needs to expend `action tokens`; they can be used to move, shoot, or upgrade a player's range.
+- To perform actions, a player needs to expend `action tokens`; they can be used to move, shoot, or gift another player that token.
 - **Play is live**, meaning there are no turns; players take actions whenever they please. Players can also take as many actions as they want, so long as they have sufficient tokens.
 - At the begining of each day, each player is given an additional action token.
 - The last player standing wins the game.
@@ -68,7 +68,7 @@ It's actaully a really fascinating story, and inspired me to create a discord-bo
   - **Move** one square adjacent or diagonal to their current position
   - **Shoot** another player within their range*; shot players take -1 to their health; players are not able to heal
   - **Gift** an **Action Token** to another player within their range*; no tokens are lost in this exchange, the giving player loses 1 token, while the recieving player gains 1.
-  - **Upgrade** their **Range**; players range goes up by 1
+  <!-- - **Upgrade** their **Range**; players range goes up by 1 -->
 
 \* _**range**: if a player has a range of 2, another player is "within range" if they are 2 squares or less away, diagonally or adjacently_
 
@@ -114,7 +114,7 @@ Every command is prefaced with an exclamation point (`!`). Some commands need mo
 - `!shoot <coordinates>`: player shoots at `coordinates` (coordinates formatted as a single letter A-J followed by a digit 0-9)
     - *examples: "`!shoot c4`" , "`!shoot H0`"*
 - `!gift-token <coordinates>`: same as shooting, but player at `coordinates` gains 1 action token instead of taking damage
-- `!upgrade-range`: player adds 1 to their range
+<!-- - `!upgrade-range`: player adds 1 to their range -->
 ### Jurors (dead players)
 - `!vote <user_name>`: casts vote for player with `user_name`; vote can be changed as many times as the jurer would like up until the daily action tokens are given out
     - *example: "`!vote deraj21`"*

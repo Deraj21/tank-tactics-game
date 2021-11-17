@@ -1,14 +1,13 @@
 # Tank Tactics discord bot <!-- omit in toc -->
 - [User Requirements](#user-requirements)
   - [MVP](#mvp)
-  - [Post-mvp](#post-mvp)
 - [Questions](#questions)
 - [TODO](#todo)
   - [Node server Todo](#node-server-todo)
   - [Testing](#testing)
   - [BUGS](#bugs)
-  - [post-mvp](#post-mvp-1)
 - [Useful Links](#useful-links)
+- [Post-MVP](#post-mvp)
 
 ---
 
@@ -29,11 +28,6 @@
 - I need a way to join the game
   - admin command
 - As a Jurer (dead player), I need to votte for a person to get an extra action token; I need this vote to be anonymous
-### Post-mvp
-- give **admin** commands to edit game settings while players are joining; this could be coupled with another command to list all the settings and the appropriate values. (or maybe we maintain this in a pinned comment)
-  - settings examples: board_size, starting_health, starting_tokens, daily_token_count, starting_range, etc.
-  - `!game-setting <setting> <value>`
-    - *example: `!game-setting starting_health 2`*
 
 ---
 
@@ -48,7 +42,6 @@
 ## TODO
 ### Node server Todo
 - [ ] convert code to use database
-  - [ ] upgrade range
   - [ ] vote
   - [ ] test awarding daily tokens base on votes
 - [ ] validate setting exists when updating game setting, and correct datatype
@@ -57,14 +50,14 @@
   - [ ] ask her to try and break it
 ### BUGS
 - ...
-### post-mvp
-- Admin
-  - add new game settings
-  - remove-player
 
 ---
 
 ## Useful Links
 - [generate svg files with node.js](https://medium.com/@92sharmasaurabh/generate-svg-files-using-nodejs-d3-647d5b4f56eb)
-- [sharp docs - toFile()](https://sharp.pixelplumbing.com/api-output#tofile)
 
+---
+
+## Post-MVP
+- more settings
+  - board_size, starting_health, starting_tokens, daily_token_count, starting_range

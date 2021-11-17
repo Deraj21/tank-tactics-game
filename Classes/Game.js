@@ -15,84 +15,54 @@ const { JSDOM } = jsdom
  * Game
  */
 const Game = {
-    startGame: async function(){
-        return new Promise(async (resolve, reject) => {
-            const gameHasStarted = await dbHelper.getGameStarted()
-            if (gameHasStarted){
-                reject(Error['013'])
-            }
-    
-            dbHelper.setGameStarted(true).then(res => {
-                this.randomizePlayerPositions().then(posRes => {
-                    resolve(posRes)
-                })
-            })
-            .catch(err => {reject(err)})
-        })
-    },
     resetGame: function(){
         dbHelper.resetGame()
     },
-    randomizePlayerPositions: async function(){
-        return new Promise(async (resolve, reject) => {
-            // create flat array of all coordinates
-            const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
-            const NUM_COLS = await dbHelper.getGameSetting('num_cols')
-            let coords = []
-            for (let r = 0; r < NUM_ROWS; r++){
-                for (let c = 0; c < NUM_COLS; c++){
-                    coords.push(r + '-' + c)
-                }
+    randomizePlayerPositions: function(settings){
+        const { num_rows, num_cols }
+        // create flat array of all coordinates
+        let coords = []
+        for (let r = 0; r < num_rows; r++){
+            for (let c = 0; c < num_cols; c++){
+                coords.push(r + '-' + c)
             }
-    
-            // get players
-            dbHelper.getPlayers().then(players => {
-                players.forEach(async (player, i) => {
-                    // for each player, splice coordinate from the list
-                    let coordinates = Utils.randomFromList(coords).split('-')
-                    player.position.r = parseInt(coordinates[0])
-                    player.position.c = parseInt(coordinates[1])
-    
-                    await dbHelper.updatePlayer(player.username, player)
-    
-                    if (i === players.length - 1){
-                        resolve(players)
-                    }
-                })
-            })
+        }
+
+        players.forEach(player => {
+            // for each player, splice coordinate from the list
+            let coordinates = Utils.randomFromList(coords).split('-')
+            player.position.r = parseInt(coordinates[0])
+            player.position.c = parseInt(coordinates[1])
         })
+
+        coordinates = []
     },
-    giveDailyTokens: function(){
-        return new Promise(async (resolve, reject) => {
-            let numTokens = await dbHelper.getGameSetting('daily_token_count')
-            let votes = await dbHelper.getVotes()
+    giveDailyTokens: function(players, votes, settings){
+        const votes_for_token = 3 // TODO: change to setting
+        const { daily_token_count } = settings
 
-            let tally = {}
-            for (let key in votes){
-                if (tally[votes[key]]){
-                    tally[votes[key]]++
-                } else {
-                    tally[votes[key]] = 1
-                }
+        let tally = {}
+        for (let key in votes){
+            if (tally[votes[key]]){
+                tally[votes[key]]++
+            } else {
+                tally[votes[key]] = 1
             }
-            
-            let players = await dbHelper.getPlayers()
-            players.forEach(async player => {
-                if (!player.isDead){
-                    player.actionTokens += parseInt(numTokens)
-                    if (tally[player.username] >= 3){
-                        player.actionTokens += parsInt(numTokens)
-                    }
-                    await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
+        }
+        
+        players.forEach(player => {
+            if (!player.isDead){
+                player.actionTokens += parseInt(daily_token_count)
+                if (tally[player.username] >= votes_for_token){
+                    player.actionTokens += parsInt(daily_token_count)
                 }
-            })
-
-            // 'forget' votes
-            await dbHelper.emptyVotes()
-            resolve(players)
+                await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
+            }
         })
 
-
+        // 'forget' votes
+        votes = {}
+        return ''
     },
     printVotes: function(votes){
         if ( !Object.keys(votes).length ){
@@ -181,14 +151,8 @@ const Game = {
 
         return text
     },
-
-    /**
-     * @param {Message} - discordMsg
-     */
-    postBoard: async function(discordMsg){
-        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
-        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
-        const players = await dbHelper.getPlayers()
+    postBoard: function(discordMsg, players, settings){
+        const { num_rows, num_cols } = settings
         const dom = new JSDOM('<!DOCTYPE html><body></body>')
 
         // svg
@@ -203,11 +167,11 @@ const Game = {
 
         // scales
         const xScale = scaleLinear()
-            .domain([0, NUM_ROWS])
+            .domain([0, num_rows])
             .range([0, innerW])
 
         const yScale = scaleLinear()
-            .domain([0, NUM_COLS])
+            .domain([0, num_cols])
             .range([0, innerH])
             .nice()
 
@@ -228,17 +192,17 @@ const Game = {
         const yAxisG = g.append('g').call(yAxis)
         yAxisG.selectAll('text')
             .attr('font-size', fontSize)
-            .attr('transform', `translate(0,${innerH / NUM_ROWS / 2})`)
+            .attr('transform', `translate(0,${innerH / num_rows / 2})`)
 
         // xAxis
         const xAxisG = g.append('g').call(xAxis)
         xAxisG.selectAll('text')
             .attr('font-size', fontSize)
-            .attr('transform', `translate(${innerW / NUM_COLS / 2},0)`)
+            .attr('transform', `translate(${innerW / num_cols / 2},0)`)
 
         // players (tanks)
         players.forEach(player => {
-            this.appendPlayer(player, g, NUM_COLS, NUM_ROWS)
+            this.appendPlayer(player, g, num_cols, num_rows)
         })
 
         const svgString = body.html()
@@ -250,14 +214,6 @@ const Game = {
             .toFormat('png')
             .toBuffer()
             .then(data => {
-                // console.log(data)
-                // const attachmentFromBuffer = new MessageAttachment(data, {
-                //     id: SnowflakeUtil.generate(),
-                //     filename: fileName,
-                //     description: 'Tank Tactics Board Update',
-                //     media_type: 'image'
-                // })
-
                 discordMsg.channel.send({ files: [ data ] })
                     .catch(err => {
                         console.log(err)
@@ -266,12 +222,10 @@ const Game = {
             .catch(err => {
                 console.log("sharp image failed:", err)
             })
-
-
     },
-    appendPlayer: async function(data, g, NUM_COLS, NUM_ROWS){
-        const   w = innerW / NUM_COLS,
-                h = innerH / NUM_ROWS
+    appendPlayer: function(data, g, num_cols, num_rows){
+        const   w = innerW / num_cols,
+                h = innerH / num_rows
         const textMargin = H / 200,
             heartH = h / 2.5,
             tokenW = w / 6
@@ -330,7 +284,6 @@ const Game = {
             .text(addZero(actionTokens))
             .attr('font-size', fontSize)
             .attr('transform', `translate(${-fontSize/2},${fontSize/3})`)
-        
 
         return player
     },
