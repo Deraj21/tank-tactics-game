@@ -7,7 +7,7 @@
   - [Testing](#testing)
   - [BUGS](#bugs)
 - [Useful Links](#useful-links)
-- [Post-MVP](#post-mvp)
+- [Post MVP Ideas](#post-mvp-ideas)
 
 ---
 
@@ -58,6 +58,37 @@
 
 ---
 
-## Post-MVP
-- more settings
-  - board_size, starting_health, starting_tokens, daily_token_count, starting_range
+## Post-MVP Ideas
+- ~~remove player from game~~
+  - this seems to be not needed. if a player is being abusive, kick them from the server. If a player just doesn't want to play the game anymore, their tank can just sit there and not play
+- players can upgrade their range
+  - should this be permanant or temporary?
+  - what should the cost be?
+- dead player's tokens are left on the board
+- players can only see as far as their range allows
+  - this potentially could add another dimension, making information a commodity to be traded, lied about, etc.
+  - however, this is a pretty big ask
+    - this means that players will each need to see their own personal board
+    - either DMed individually, or maybe building the actual HTML app that reads the replit database, and generates the board based on a key you give it.
+  - what if players text each other screen-shots of their board? is that just part of the game?
+    - if the understanding is that we don't send board screenshots, then the game is more about "do I trust the info given me?"
+    - but if that is allowed, then bargaining with a screenshot of your board could be interesting in its own right
+- daily tokens automated
+  - another semi-big ask; where do I get timed events? is there a js library I can use? is there something built into the discord bot api?
+- create a mongoDB database te replace replit database
+- Tons of settings
+  - 'daily' token interval (minutes, hours, days)
+  - first token givout time
+  - max number of players
+  - allow cease fires
+  - cease fire interval
+  - allow range upgrades
+  - movement cost
+  - shooting cost
+  - starting range
+- allow for quick plays (1 token meted every 3 minutes or similar)
+- cease fire command
+  - given to admin as a way to 'pause' the game during vacations or something
+  - given as a setting to have set times every day while game is in play. ex: cease fire every night from 9pm to 9am
+  - given to player at a token cost as another tool
+- terrain that costs extra movement or can't be moved through or shot through?
