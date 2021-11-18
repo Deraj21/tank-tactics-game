@@ -10,7 +10,7 @@ import Game from "./Classes/Game.js"
 import Player from "./Classes/Player.js"
 import Utilities from "./Classes/Utilities.js"
 import dbHelper from "./Classes/dbHelper.js"
-import ErrorCodes from './Classes/ErrorCodes.js'
+import Error from './Classes/ErrorCodes.js'
 
 // setup
 const { catchError, shortNameLength } = Utilities
@@ -21,19 +21,22 @@ const ADMIN_UNAME = process.env['ADMIN_UNAME']
 const GM_ROLE = "GameMaster"
 let votes
 
-
+// dbHelper.updatePlayers([])
+// dbHelper.updateVotes({})
+// dbHelper.getAll()
 
 
 async function parseCommand(msg){
     let split = msg.content.split(' ')
     let command = split.shift().toLowerCase()
+    let isGM = msg.member.roles.cache.some(role => role.name === GM_ROLE)
+
+    let invalidCommand = false
     let boardUpdated = false
     let settingsUpdated = false
     let playersUpdated = false
     let printPlayers = false
     let printVotes = ''
-    let invalidCommand = false
-    let isGM = msg.member.roles.cache.some(role => role.name === GM_ROLE)
     let result = ''
 
     let players = await dbHelper.getPlayers()
@@ -55,7 +58,7 @@ async function parseCommand(msg){
             case "!start-game":
             case "!start":
                 if (gameStarted){
-                    msg.reply(ErrorCodes['013'])
+                    msg.reply(Error['013'])
                 } else {
                     Game.randomizePlayerPositions(players, settings)
                     gameStarted = true
@@ -68,18 +71,25 @@ async function parseCommand(msg){
             case "!reset":
                 /////////// Need to convert! /////////////
                 msg.reply("Game has been reset. Players can join until the game starts")
-                Game.resetGame()
+                gameStarted = false
+                gameStartedUpdated = true
                 break;
             case "!add-test-data":
             case "!test-data":
-                dbHelper.setDummyData()
-                    .then(res => {
-                        msg.reply('test data set')
-                    })
-                    .catch(err => {
-                        msg.reply('test data failed')
-                        console.log(err)
-                    })
+                if (!gameStarted){
+                    players = [ ...players, ...dbHelper.getDummyData() ]
+                    playersUpdated = true
+                } else {
+                    msg.reply()
+                }
+
+                    // .then(res => {
+                    //     msg.reply('test data set')
+                    // })
+                    // .catch(err => {
+                    //     msg.reply('test data failed')
+                    //     console.log(err)
+                    // })
                 break;
             case "!get-players":
                 resolve({ playersUpdated: true })
@@ -136,7 +146,7 @@ async function parseCommand(msg){
                     msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
                 })
                 .catch(code => {
-                    msg.reply( ErrorCodes[code] )
+                    msg.reply( Error[code] )
                 })
             break;
         case "!move":
@@ -146,7 +156,7 @@ async function parseCommand(msg){
                     resolve({ boardUpdated: true })
                 })
                 .catch(code => {
-                    msg.reply(ErrorCodes[code])
+                    msg.reply(Error[code])
                 })
             
             break;
@@ -158,7 +168,7 @@ async function parseCommand(msg){
                     resolve({boardUpdated: true})
                 })
                 .catch(code => {
-                    msg.reply(ErrorCodes[code])
+                    msg.reply(Error[code])
                 })
             break;
         case "!gift-token":
@@ -196,6 +206,7 @@ async function parseCommand(msg){
             break;
     }
 
+    let promises = []
 
     // update and reply
     if (boardUpdated){
@@ -217,50 +228,34 @@ async function parseCommand(msg){
         dbHelper.setGameStarted(gameStarted)
     }
 
-    // previously after new Promise
-    // .then(async res => {
-    //     if (res.boardUpdated){
-    //         Game.postBoard(msg)
-    //     }
-    //     if (res.playersUpdated){
-    //         const playersData = await dbHelper.getPlayers()
-    //         if (playersData.length){
-    //             msg.reply( Player.printPlayers(playersData) )
-    //         } else {
-    //             console.log(ErrorCodes['014'])
-    //             msg.reply(ErrorCodes['014'])
-    //         }
-    //     }
-    // })
-
 }
 
 /////////
 // EVENTS
-// client.on('ready', () => {
-//     console.log(`Logged in as ${client.user.tag}!`)
-// })
+client.on('ready', () => {
+    console.log(`Logged in as ${client.user.tag}!`)
+})
 
-// client.on('messageCreate', msg => {
-//     if (msg.author.bot) return;
+client.on('messageCreate', msg => {
+    if (msg.author.bot) return;
     
-//     if (msg.channel.name === "call-out-moves") {
-//         if (msg.content.match(/^\!.*/)){ // starts with !
-//             parseCommand(msg)
-//         }
-//     } else if (msg.channel.type === "DM") {
-//         msg.author.send("You are DMing me now!")
-//     }
+    if (msg.channel.name === "call-out-moves") {
+        if (msg.content.match(/^\!.*/)){ // starts with !
+            parseCommand(msg)
+        }
+    } else if (msg.channel.type === "DM") {
+        msg.author.send("You are DMing me now!")
+    }
 
-// })
+})
 
 
-// // Bot log in
-// client.login(DISCORD_TOKEN)
-//     .then(res => {
-//         console.log(res)
-//     })
-//     .catch(err => {
-//         console.log(err)
-//     })
+// Bot log in
+client.login(DISCORD_TOKEN)
+    .then(res => {
+        console.log(res)
+    })
+    .catch(err => {
+        console.log(err)
+    })
 

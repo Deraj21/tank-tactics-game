@@ -63,14 +63,13 @@ const dbHelper = {
         this.emptyVotes()
         this.setGameStarted(false)
     },
-    setDummyData: function(settings){
-        let dummyData = Utils.dummyUsernames.map(username => {
+    getDummyData: function(settings){
+        return Utils.dummyUsernames.map(username => {
             return this.getNewPlayer(username, username.slice(0, 6), settings)
         })
-        return this.updatePlayers(dummyData)
     },
     getAll: function(string = ''){
-        db.list(string)
+        return db.list(string)
             .then(keys => {
                 Promise.all(
                     keys.map(k => {

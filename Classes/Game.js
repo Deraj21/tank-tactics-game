@@ -18,8 +18,9 @@ const Game = {
     resetGame: function(){
         dbHelper.resetGame()
     },
-    randomizePlayerPositions: function(settings){
-        const { num_rows, num_cols }
+    randomizePlayerPositions: function(players, settings){
+        console.log(settings)
+        const { num_rows, num_cols } = settings
         // create flat array of all coordinates
         let coords = []
         for (let r = 0; r < num_rows; r++){
@@ -35,7 +36,7 @@ const Game = {
             player.position.c = parseInt(coordinates[1])
         })
 
-        coordinates = []
+        coords = []
     },
     giveDailyTokens: function(players, votes, settings){
         const votes_for_token = 3 // TODO: change to setting
@@ -56,7 +57,6 @@ const Game = {
                 if (tally[player.username] >= votes_for_token){
                     player.actionTokens += parsInt(daily_token_count)
                 }
-                await dbHelper.updatePlayer(player.username, { actionTokens: player.actionTokens })
             }
         })
 
