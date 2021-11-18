@@ -4,213 +4,169 @@ import dbHelper from './dbHelper.js'
 
 
 const Player = {
-    /**
-     * @param {string} uname - new player's username
-     */
-    joinGame: function(uname, shortName){
-        return new Promise(async (resolve, reject) => {
-            const gameStarted = await dbHelper.getGameStarted()
-            if (gameStarted){
-                reject('004')
+    joinGame: function(username, givenShortName, players, settings){
+        // if already joined
+        if (players.find(p => p.username === username)){
+            return '012'
+        }
+        
+        let shortName = ""
+        if (givenShortName === undefined || givenShortName === ""){
+            shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
+        } else if (givenShortName.length < shortNameLength) {
+            shortName = givenShortName + ".".repeat(shortNameLength - givenShortName.length)
+        } else if (givenShortName.length > shortNameLength){
+            shortName = givenShortName.split('').splice(0, shortNameLength).join('')
+        } else {
+            shortName = givenShortName
+        }
+
+        if (players.find(p => p.shortName === shortName)){
+            return '016'
+        }
+
+        players = [
+            ...players,
+            dbHelper.getNewPlayer(username, shortName, settings)
+        ]
+    },
+    move: function(username, dir, players, settings){
+        const { num_cols, num_rows } = settings
+        let player = players.find(p => {p.username === username})
+
+        if (player.actionTokens === 0){
+            return '003'
+        }
+
+        // parse string
+        dir = dir.toUpperCase()
+        if (!Utils.DIRECTIONS.includes(dir)){
+            return '002'
+        }
+        let result = dir.split('')
+        
+        // 1st coord
+        switch (result[0]){
+            case 'N':
+                player.position.r--
+                break;
+            case 'S':
+                player.position.r++
+                break;
+            case 'W':
+                player.position.c--
+                break;
+            case 'E':
+                player.position.c++
+                break;
+            default:
+                break;
+        }
+
+        // 2nd coord
+        switch (result[1]){
+            case 'W':
+                player.position.c--
+                break;
+            case 'E':
+                player.position.c++
+                break;
+            default:
+                break;
+        }
+
+        // check out of bounds
+        if (player.position.r < 0 || player.position.r > num_rows-1 || player.position.c < 0 || player.position.c > num_cols-1){
+            return '001'
+        }
+        
+        // check ran into other players
+        let ranIntoPlayer = false
+        players.forEach(p => {
+            let pos = p.position
+            if (p.username === player.username){
+                return
+            } else if (pos.r === player.position.r && pos.c === player.position.c){
+                ranIntoPlayer = true
                 return
             }
-
-            dbHelper.getPlayers().then(players => {
-                let alreadyJoined = false
-                players.forEach( p => {
-                    if (p.username === uname || p.shortName === shortName)
-                        alreadyJoined = true
-                })
-                if (alreadyJoined){
-                    reject('012')
-                    return
-                }
-
-                dbHelper.createPlayer(uname, shortName).then(player => resolve(player))
-            })
         })
-    },
+        if (ranIntoPlayer){
+            return '008'
+        }
 
-    /**
-     * move - move player in cardinal direction by one
-     * @param {string} uname - username of player doing the action
-     * @param {string} dir - cardinal direction i.e 'S' or 'NW'
-     */
-    move: async function(uname, dir){
-        const NUM_COLS = await dbHelper.getGameSetting('num_cols')
-        const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
-        let player = await dbHelper.getPlayer(uname)
-
-        return new Promise((resolve, reject) => {
-            if (player.actionTokens === 0){
-                reject('003')
-            }
-
-            // parse string
-            dir = dir.toUpperCase()
-            if (!Utils.DIRECTIONS.includes(dir)){
-                reject('002')
-            }
-            let result = dir.split('')
-            
-            // 1st coord
-            switch (result[0]){
-                case 'N':
-                    player.position.r--
-                    break;
-                case 'S':
-                    player.position.r++
-                    break;
-                case 'W':
-                    player.position.c--
-                    break;
-                case 'E':
-                    player.position.c++
-                    break;
-                default:
-                    break;
-            }
-
-            // 2nd coord
-            switch (result[1]){
-                case 'W':
-                    player.position.c--
-                    break;
-                case 'E':
-                    player.position.c++
-                    break;
-                default:
-                    break;
-            }
-
-            // check out of bounds
-            if (player.position.r < 0 || player.position.r > NUM_ROWS-1 || player.position.c < 0 || player.position.c > NUM_COLS-1){
-                reject('001')
-            }
-            
-            // check ran into other players
-            dbHelper.getPlayerPositions()
-                .then(playersPos => {
-                    let ranIntoPlayer = false
-                    playersPos.forEach(playerPos => {
-                        let pos = playerPos.position
-                        if (playerPos.username === player.username){
-                            return
-                        } else if (pos.r === player.position.r && pos.c === player.position.c){
-                            ranIntoPlayer = true
-                            return
-                        }
-                    })
-                    if (ranIntoPlayer){
-                        reject('008')
-                    }
-
-                    player.actionTokens--
-                    dbHelper.updatePlayer(uname, {
-                        actionTokens: player.actionTokens,
-                        position: { ...player.position }
-                    })
-                    .then(response => resolve(response))
-                    .catch(err => reject(err) )
-                })
-                .catch(err => {
-                    reject(err)
-                })
-        })
+        player.actionTokens--
+        return ''
     },
 
     /**
      * shoot - player shoots at coordinate on board
-     * @param {string} uname - username of player doing the action
+     * @param {string} username - username of player doing the action
      * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
+     * @param {Array} players - players from the database
+     * @param {Object} settings - game settings object from database
      * @param {boolean} isShooting - is player shooting or gifting an action point
+     * @param {number} numTokens - (integer) number of tokens being gifted
      */
-    //////// need to update for database /////////////////////////////////
-    shoot: async function(uname, coords, isShooting = true, numTokens){
-        let player = await dbHelper.getPlayer(uname)
-        let { range, position, actionTokens } = player
-        let { r, c } = position
+    shoot: function(username, coords, players, settings, isShooting = true, numTokens){
+        let player = players.find(p => p.username === username)
 
-        return new Promise(async (resolve, reject) => {
-            if (actionTokens < 1){
-                reject('003')
-            }
-            if (!coords){
-                reject('009')
-            }
-    
-            // parse coordinates
-            coords = coords ? coords.toUpperCase() : ""
-            let splitCoords = coords.split('')
-            
-            // check valid coordinates
-            let row = Utils.ROW_NAMES.findIndex((name, i) => {
-                return name === splitCoords[0]
-            })
-            if (splitCoords.length > 2 || row === -1 || splitCoords[1].match(/\d/) === null){
-                reject('009')
-            }
-            let col = parseInt(splitCoords[1])
-    
-            // check sufficient range
-            if (Math.abs(row - r) > range || Math.abs(col - c) > range){
-                reject('010')
-            }
-    
-            // check player at coordinates
-            let playerPositions = await dbHelper.getPlayers()
-            let hitPlayer = null
-            playerPositions.forEach(pos => {
-                if (!pos.isDead && pos.position.r === row && pos.position.c === col){
-                    hitPlayer = pos
-                }
-            })
-            if (hitPlayer === null){
-                reject('011')
-            }
-            
-            // have player take damage
-            if (isShooting){
-                hitPlayer.health--
-                // check death
-                if (hitPlayer.health <= 0){
-                    hitPlayer.isDead = true
-                    hitPlayer.position = { r: -1, c: -1 }
-                }
-                player.actionTokens--
-            } else {
-                hitPlayer.actionTokens += numTokens
-                player.actionTokens -= numTokens
-            }
-    
-            // remove action token
-    
-            dbHelper.updatePlayer(uname, player)
-                .then(res => {
-                    dbHelper.updatePlayer(hitPlayer.username, hitPlayer)
-                        .then(hitRes => resolve({
-                            player,
-                            hitPlayer
-                        }))
-                        .catch(hitErr => reject(hitErr))
-                })
-                .catch(err => reject(err))
+        if (player.actionTokens < 1){
+            return '003'
+        }
+        if (!coords){
+            return '009'
+        }
+
+        // parse coordinates
+        coords = coords ? coords.toUpperCase() : ""
+        let splitCoords = coords.split('')
+        
+        // check valid coordinates
+        let row = Utils.ROW_NAMES.findIndex((name, i) => {
+            return name === splitCoords[0]
         })
-    },
+        if (splitCoords.length > 2 || row === -1 || splitCoords[1].match(/\d/) === null){
+            return '009'
+        }
+        let col = parseInt(splitCoords[1])
 
-    /**
-     * giftActionToken - gift another player an action token
-     * @param {string} uname - username of player giving the token
-     * @param {string} coords - 2-character coords being aimed at; i.e 'a3' or 'H7'
-     */
-    giftActionToken: function(uname, coords, numTokens = 1){
-        return this.shoot(uname, coords, false, parseInt(numTokens))
+        // check sufficient range
+        if (Math.abs(row - player.position.r) > player.range || Math.abs(col - player.position.c) > player.range){
+            return '010'
+        }
+
+        // check player at coordinates
+        let hitPlayer = null
+        players.forEach(pos => {
+            if (!pos.isDead && pos.position.r === row && pos.position.c === col){
+                hitPlayer = pos
+            }
+        })
+        if (hitPlayer === null){
+            return '011'
+        }
+        
+        // have player take damage
+        if (isShooting){
+            hitPlayer.health--
+            // check death
+            if (hitPlayer.health <= 0){
+                hitPlayer.isDead = true
+                hitPlayer.position = { r: -1, c: -1 }
+            }
+            player.actionTokens--
+        } else {
+            hitPlayer.actionTokens += numTokens
+            player.actionTokens -= numTokens
+        }
+
+        return hitPlayer.username
     },
-    
-    /**
-     * upgradeRange - up the player's range by 1
-     * @param {string} uname - username of player doing the action
-     */
+    giftActionToken: function(username, coords, numTokens = 1, players, settings){
+        return this.shoot(username, coords, players, settings, false, parseInt(numTokens))
+    },
+    // Not Used (right now)
     upgradeRange: function(uname){
         let player = dbHelper.getPlayer(uname)
         if (player.actionTokens < 1){
@@ -227,28 +183,24 @@ const Player = {
      * @param {string} voterUname - username of Jurer
      * @param {string} recipientUname - username that the Jurer submitted
      */
-    vote: function(voterUname, recipientUname){
-        let voter = dbHelper.getPlayer(voterUname)
-        let recipient = dbHelper.getPlayer(recipientUname)
+    vote: function(voterName, recipientName, players){
+        let voter = players.find(p => p.username = voterName)
+        let recipient = players.find(p => p.shortName = recipientName)
 
         // make sure players exist
         if (voter === null || recipient === null){
-            console.error(Error['007'])
             return '007'
         }
 
         // make sure voter is dead
         if (!voter.isDead){
-            console.error(Error['005'])
             return '005'
         }
         // make sure recipient is not dead
         if (recipient.isDead){
-            console.error(Error['006'])
             return '006'
         }
 
-        dbHelper.updateVote(voterUname, recipientUname)
     },
     /**
      * printInfo - prints out a players info
@@ -258,6 +210,7 @@ const Player = {
     printInfo: function(player, long = false){
         let { username, shortName, health, actionTokens, range, position, color, isDead } = player
         let { r, c } = position
+
         if (long){
             return  `-- **${shortName} (${username})${isDead ? ": Juror" : ""}** --\n` + 
                     `health:       ${health}\n` + 
@@ -267,7 +220,13 @@ const Player = {
                     `color:        ${color}\n`
         } else {
             return `**${shortName}** (${username}):   ` +
-            (isDead ? Utils.getDeathMessage() + "\n" : `${health} hp,  ${range} range,  ${actionTokens} tokens\n`)
+            (
+                isDead
+                ?
+                Utils.getDeathMessage() + "\n"
+                :
+                `${health} hp,  ${range} range,  ${actionTokens} tokens\n`
+            )
         }
     },
 

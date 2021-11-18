@@ -27,8 +27,8 @@ let votes
 
 
 async function parseCommand(msg){
-    let split = msg.content.split(' ')
-    let command = split.shift().toLowerCase()
+    let args = msg.content.split(' ')
+    let command = args.shift().toLowerCase()
     let isGM = msg.member.roles.cache.some(role => role.name === GM_ROLE)
 
     let invalidCommand = false
@@ -36,8 +36,9 @@ async function parseCommand(msg){
     let settingsUpdated = false
     let playersUpdated = false
     let printPlayers = false
+    let printSettings = false
     let printVotes = ''
-    let result = ''
+    let result = null
 
     let players = await dbHelper.getPlayers()
     let settings = await dbHelper.getGameSettings()
@@ -69,55 +70,41 @@ async function parseCommand(msg){
                 break;
             case "!reset-game":
             case "!reset":
-                /////////// Need to convert! /////////////
                 msg.reply("Game has been reset. Players can join until the game starts")
                 gameStarted = false
                 gameStartedUpdated = true
                 break;
             case "!add-test-data":
             case "!test-data":
+                /////////// Need to test! /////////////
                 if (!gameStarted){
                     players = [ ...players, ...dbHelper.getDummyData() ]
                     playersUpdated = true
+                    mgs.reply('test data set:\n' + Player.printPlayers(players))
                 } else {
-                    msg.reply()
+                    msg.reply(Error['015'])
                 }
-
-                    // .then(res => {
-                    //     msg.reply('test data set')
-                    // })
-                    // .catch(err => {
-                    //     msg.reply('test data failed')
-                    //     console.log(err)
-                    // })
                 break;
             case "!get-players":
-                resolve({ playersUpdated: true })
+                printPlayers = true
                 break;
             case "!get-votes":
-                votes = await dbHelper.getVotes()
-                msg.reply( Game.printVotes(votes) )
+                printVotes = Game.printVotes(votes)
                 break;
             case "!clear-channel": // post-mvp
-                // msg.reply("Deleting stuff...")
                 break;
             case "!get-board":
             case "!gb":
-                // Game.postBoard(msg);
-                resolve({boardUpdated: true})
+                boardUpdated = true
                 break;
             case "!game-setting":
-                dbHelper.setGameSetting(...split)
-                    .then(res => {
-                        msg.reply(`${split[0]} has been set to ${split[1]}`)
-                    })
-                    .catch(err => console.log(err))
+                let settingName = args[0]
+                let settingValue = args[1]
+                settings[settingName] = settingValue
+                msg.reply(`${settingName} has been set to ${settingValue}`)
                 break;
             case "!get-settings":
-                dbHelper.getGameSettings()
-                    .then(settings => {
-                        msg.reply( Game.printSettings(settings) )
-                    })
+                printSettings = true
                 break;
             default:
                 invalidCommand = true
@@ -129,79 +116,69 @@ async function parseCommand(msg){
     switch(command){
         case "!join":
         case "!j":
-            // get shortName
-            let shortName = ""
-            if (split[0] === undefined || split[0] === ""){
-                shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
-            } else if (split[0].length < shortNameLength) {
-                shortName = split[0] + ".".repeat(shortNameLength - split[0].length)
-            } else if (split[0].length > shortNameLength){
-                shortName = split[0].split('').splice(0, shortNameLength).join('')
+            if (gameStarted){
+                result = '004'
             } else {
-                shortName = split[0]
+                result = Player.joinGame(msg.author.username, args[0], players, settings)
             }
-
-            Player.joinGame(msg.author.username, shortName)
-                .then(res => {
-                    msg.reply(`"${msg.author.username}" (${shortName}) joined the game`)
-                })
-                .catch(code => {
-                    msg.reply( Error[code] )
-                })
+            
+            if (result){
+                msg.reply(Error[result])
+            }
             break;
         case "!move":
         case "!m":
-            Player.move(msg.author.username, ...split)
-                .then(response => {
-                    resolve({ boardUpdated: true })
-                })
-                .catch(code => {
-                    msg.reply(Error[code])
-                })
+            result = Player.move(msg.author.username, args[0], players, settings)
+            if (result){
+                msg.reply(Error[result])
+            } else {
+                boardUpdated = true
+                playersUpdated = true
+            }
             
             break;
         case "!shoot":
         case "!s":
-            Player.shoot(msg.author.username, split[0])
-                .then(res => {
-                    msg.reply(`${res.player.shortName} shot ${res.hitPlayer.shortName}`)
-                    resolve({boardUpdated: true})
-                })
-                .catch(code => {
-                    msg.reply(Error[code])
-                })
+            result = Player.shoot(msg.author.username, args[0], players, settings)
+
+            if (catchError(result)){
+                msg.reply(Error[result])
+            } else {
+                msg.reply(`${mgs.author.username} shot ${result}`)
+                boardUpdated = true
+                playersUpdated = true
+            }
             break;
         case "!gift-token":
         case "!gt":
-            Player.giftActionToken(msg.author.username, ...split)
-                .then(res => {
-                    msg.reply(`${res.player.shortName} gifted a token to ${res.hitPlayer.shortName}`)
-                })
-                .catch(err => {
-                    
-                })
-            boardUpdated = true
+            result = Player.giftActionToken(msg.author.username, ...args, players, settings)
+
+            if (catchError(result)){
+                msg.reply(Error[result])
+            } else {
+                msg.reply(`${res.player.shortName} gifted token(s) to ${res.hitPlayer.shortName}`)
+                boardUpdated = true
+                playersUpdated = true
+            }
             break;
         case "!vote":
         case "!v":
-            /// NEED TO TEST //////////////////////
-            result = Player.vote(msg.author.username, ...split)
-            msg.reply(`player ${msg.author.username} is voting for ${split.join(' ')}`)
-            msg.author.send('You can start dming me now')
+            result = Player.vote(msg.author.username, args[0], players)
+            
+            if (catchError(result)){
+                msg.reply(Error[result])
+            } else {
+                msg.reply(`player ${msg.author.username} is voting for ${args.join(' ')}`)
+                msg.author.send('You can start dming me now')
+            }
+
             break;
         case "!ping":
             msg.reply("pong!")
             break;
         default:
-            if (invalidCommand){
+            if (invalidCommand || !isGM){
                 msg.reply("`" + msg.content + "` is not a valid command.")
-                    .then(res => {
-                        // console.log(msg)
-                        // msg.delete()
-                    })
-                    .catch(err => {
-                        console.log(err)
-                    })
             }
             break;
     }
@@ -220,6 +197,9 @@ async function parseCommand(msg){
     }
     if (printVotes !== ''){
         msg.reply( printVotes )
+    }
+    if (printSettings){
+        msg.reply(Game.printSettings(settings))
     }
     if (settingsUpdated){
         dbHelper.updateGameSettings(settings)

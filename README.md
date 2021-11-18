@@ -7,7 +7,7 @@
   - [Testing](#testing)
   - [BUGS](#bugs)
 - [Useful Links](#useful-links)
-- [Post MVP Ideas](#post-mvp-ideas)
+- [Post-MVP Ideas](#post-mvp-ideas)
 
 ---
 
@@ -92,3 +92,7 @@
   - given as a setting to have set times every day while game is in play. ex: cease fire every night from 9pm to 9am
   - given to player at a token cost as another tool
 - terrain that costs extra movement or can't be moved through or shot through?
+- make votes anonymous
+  - [stack overflow - how to recieve](https://stackoverflow.com/questions/48729041/checking-if-a-message-is-a-dm-discord-js-and-discord-js-commando/51390434)
+  - [stack overflow - how to send](https://stackoverflow.com/questions/41745070/sending-private-messages-to-user)
+- 
