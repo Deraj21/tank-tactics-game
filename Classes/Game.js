@@ -6,7 +6,7 @@ import sharp from 'sharp'
 import { MessageAttachment, MessagePayload, SnowflakeUtil } from 'discord.js'
 
 import { select, scaleLinear, axisTop, axisLeft, arc } from 'd3'
-const { hashRGB, H, W, margin, innerW, innerH, fontSize, ROW_NAMES, maxHealth } = Utils
+const { hashRGB, parseBool, H, W, margin, innerW, innerH, fontSize, ROW_NAMES, maxHealth } = Utils
 
 // const { select } = d3
 const { JSDOM } = jsdom
@@ -17,6 +17,35 @@ const { JSDOM } = jsdom
 const Game = {
     resetGame: function(){
         dbHelper.resetGame()
+    },
+    setGameSetting: function(name, value, settings){
+        if (settings[name] == undefined)
+            return '019'
+            
+        // check type
+        if (typeof settings[name] == 'number'){
+            let numVal = parseInt(value)
+            if (numVal === NaN){
+                return '020'
+            }
+            value = numVal
+        } else if (typeof settings[name] == 'boolean') {
+            let boolVal = parseBool(value)
+            if (typeof boolVal != 'boolean'){
+                return '021'
+            }
+            value = boolVal
+        } else {
+            // string validation?
+        }
+        
+        // check specific cases (negative, within range, etc)
+        if (!dbHelper.validateSetting(name)(value)){
+            return '022'
+        }
+
+        settings[name] = value
+        return value
     },
     randomizePlayerPositions: function(players, settings){
         console.log(settings)
@@ -89,13 +118,13 @@ const Game = {
         let text = "**__ Game Settings __**\n"
 
         for (let key in settings){
-            text += `${key} = ${settings[key]}\n`
+            text += `${key}  =  **${settings[key]}**   *(${typeof settings[key]})*\n`
         }
 
         return text
     },
     printBoard: async function(small = false){
-        // create board
+        // 'Depreciated' (it's broken, but not used, so...)
         const NUM_ROWS = await dbHelper.getGameSetting('num_rows')
         const NUM_COLS = await dbHelper.getGameSetting('num_cols')
         const players = await dbHelper.getPlayers()
@@ -152,7 +181,7 @@ const Game = {
         return text
     },
     postBoard: function(discordMsg, players, settings){
-        const { num_rows, num_cols } = settings
+        const { num_rows, num_cols, starting_health } = settings
         const dom = new JSDOM('<!DOCTYPE html><body></body>')
 
         // svg
@@ -202,7 +231,7 @@ const Game = {
 
         // players (tanks)
         players.forEach(player => {
-            this.appendPlayer(player, g, num_cols, num_rows)
+            this.appendPlayer(player, g, num_cols, num_rows, starting_health)
         })
 
         const svgString = body.html()
@@ -223,7 +252,7 @@ const Game = {
                 console.log("sharp image failed:", err)
             })
     },
-    appendPlayer: function(data, g, num_cols, num_rows){
+    appendPlayer: function(data, g, num_cols, num_rows, starting_health){
         const   w = innerW / num_cols,
                 h = innerH / num_rows
         const textMargin = H / 200,
@@ -255,7 +284,7 @@ const Game = {
             .innerRadius(0)
             .outerRadius(w/2 - textMargin)
             .startAngle(0)
-            .endAngle(Math.PI*2 * (1 - health / 3));
+            .endAngle(Math.PI*2 * (1 - health / starting_health));
         heart.append('path')
             .attr('transform', `translate(${0},${textMargin*2.5})`)
             .attr('d', arcPath)

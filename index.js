@@ -33,8 +33,9 @@ async function parseCommand(msg){
 
     let invalidCommand = false
     let boardUpdated = false
-    let settingsUpdated = false
     let playersUpdated = false
+    let settingsUpdated = false
+    let gameStartedUpdated = false
     let printPlayers = false
     let printSettings = false
     let printVotes = ''
@@ -44,7 +45,6 @@ async function parseCommand(msg){
     let settings = await dbHelper.getGameSettings()
     let votes = await dbHelper.getVotes()
     let gameStarted = await dbHelper.getGameStarted()
-    let gameStartedUpdated = false
 
     if (isGM){
         // Admin
@@ -53,8 +53,15 @@ async function parseCommand(msg){
             case "!dt":
                 printVotes = Game.printVotes(votes)
                 result = Game.giveDailyTokens(players, votes, settings)
-                boardUpdated = true
-                playersUpdated = true
+                
+                if (catchError(result)){
+                    // ?
+                } else {
+                    boardUpdated = true
+                    playersUpdated = true
+                    msg.reply(`${msg.author.username} has given out tokens!`)
+                }
+
                 break;
             case "!start-game":
             case "!start":
@@ -70,17 +77,15 @@ async function parseCommand(msg){
                 break;
             case "!reset-game":
             case "!reset":
+                dbHelper.resetGame()
                 msg.reply("Game has been reset. Players can join until the game starts")
-                gameStarted = false
-                gameStartedUpdated = true
                 break;
             case "!add-test-data":
             case "!test-data":
-                /////////// Need to test! /////////////
                 if (!gameStarted){
-                    players = [ ...players, ...dbHelper.getDummyData() ]
+                    players = [ ...players, ...dbHelper.getDummyData(settings) ]
                     playersUpdated = true
-                    mgs.reply('test data set:\n' + Player.printPlayers(players))
+                    msg.reply('test data set:\n' + Player.printPlayers(players))
                 } else {
                     msg.reply(Error['015'])
                 }
@@ -95,13 +100,22 @@ async function parseCommand(msg){
                 break;
             case "!get-board":
             case "!gb":
-                boardUpdated = true
+                if (!gameStarted){
+                    msg.reply(Error['017'])
+                } else {
+                    boardUpdated = true
+                }
                 break;
             case "!game-setting":
-                let settingName = args[0]
-                let settingValue = args[1]
-                settings[settingName] = settingValue
-                msg.reply(`${settingName} has been set to ${settingValue}`)
+                if (gameStarted){
+                    msg.reply(Error['018'])
+                } else {
+                    let settingName = args[0]
+                    let settingValue = args[1]
+                    // need to chack if setting exists & validate it is the same type
+                    settings[settingName] = settingValue
+                    msg.reply(`${settingName} has been set to ${settingValue}`) 
+                }
                 break;
             case "!get-settings":
                 printSettings = true
@@ -122,9 +136,13 @@ async function parseCommand(msg){
                 result = Player.joinGame(msg.author.username, args[0], players, settings)
             }
             
-            if (result){
+            if (catchError(result)){
                 msg.reply(Error[result])
+            } else {
+                playersUpdated = true
+                msg.reply(`**${result}** (${msg.author.username}) joined the game`)
             }
+
             break;
         case "!move":
         case "!m":
@@ -144,7 +162,9 @@ async function parseCommand(msg){
             if (catchError(result)){
                 msg.reply(Error[result])
             } else {
-                msg.reply(`${mgs.author.username} shot ${result}`)
+                msg.reply(
+                    `${result.player} shot ${result.hitPlayer}${result.dead ? ' dead' : ''}`
+                )
                 boardUpdated = true
                 playersUpdated = true
             }
@@ -169,7 +189,7 @@ async function parseCommand(msg){
                 msg.reply(Error[result])
             } else {
                 msg.reply(`player ${msg.author.username} is voting for ${args.join(' ')}`)
-                msg.author.send('You can start dming me now')
+                msg.author.send('You can start DMing me now')
             }
 
             break;
@@ -217,6 +237,8 @@ client.on('ready', () => {
 })
 
 client.on('messageCreate', msg => {
+    // console.log("channel type: ", msg.channel.type)
+
     if (msg.author.bot) return;
     
     if (msg.channel.name === "call-out-moves") {

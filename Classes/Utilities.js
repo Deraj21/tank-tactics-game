@@ -62,6 +62,11 @@ export default {
         }
     },
 
+    parseBool: function(str){
+        let lower = str.toLowerCase()
+        return lower === 'true' ? true : lower === 'false' ? false : null
+    },
+
     catchError: function(str) {
         if (typeof str == "string" && str.match(/\d{3}/)){
             return str

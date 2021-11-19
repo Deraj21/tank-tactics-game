@@ -63,12 +63,29 @@ const dbHelper = {
         this.emptyVotes()
         this.setGameStarted(false)
     },
+    /**
+     * whenever a new setting is added, a corresponding validation function needs to be added
+     * each function takes in the setting value, and returns true or false whether it is valid or not
+     * @param {*} settingName 
+     * @returns function that validates the setting
+     }}
+     */
+    validateSetting: function(settingName){
+        return {
+            num_rows: n => n > 0,
+            num_cols: this.num_rows,
+            daily_token_count: this.num_rows,
+            starting_health: this.num_rows,
+            starting_tokens: n => n >= 0,
+            starting_range: this.num_rows
+        }[settingName]
+    },
     getDummyData: function(settings){
         return Utils.dummyUsernames.map(username => {
             return this.getNewPlayer(username, username.slice(0, 6), settings)
         })
     },
-    getAll: function(string = ''){
+    logAll: function(string = ''){
         return db.list(string)
             .then(keys => {
                 Promise.all(

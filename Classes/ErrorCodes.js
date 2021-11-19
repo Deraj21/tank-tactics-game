@@ -13,12 +13,22 @@ const ErrorCodes = {
     "012": "You have already joined the game.",
     "013": "Game has already started.",
     "014": "No players to display.",
-    "015": "Game has already started. Dummy data cannot be aded.",
+    "015": "Game has already started. Dummy data cannot be added.",
     "016": "A player with that nickname has already joined.",
-    "017": "",
-    "018": "",
-    "019": "",
-    "020": ""
+    "017": "The game has not started yet.",
+    "018": "Game settings cannot be changed in the middle of the game.",
+    "019": "Setting does not exist. Use `!get-settings` to see a list of available settings.",
+    "020": "Setting must be set to a whole number.",
+    "021": "Setting must be a boolean (either `true` or `false`)",
+    "022": "Setting value is not valid",
+    "023": "",
+    "024": "",
+    "025": "",
+    "026": "",
+    "027": "",
+    "028": "",
+    "029": "",
+    "030": ""
 }
 
 export default ErrorCodes

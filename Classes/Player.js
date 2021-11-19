@@ -5,6 +5,7 @@ import dbHelper from './dbHelper.js'
 
 const Player = {
     joinGame: function(username, givenShortName, players, settings){
+        const shortNameLength = 6
         // if already joined
         if (players.find(p => p.username === username)){
             return '012'
@@ -12,7 +13,7 @@ const Player = {
         
         let shortName = ""
         if (givenShortName === undefined || givenShortName === ""){
-            shortName = msg.author.username.split('').splice(0, shortNameLength).join('')
+            shortName = username.split('').splice(0, shortNameLength).join('')
         } else if (givenShortName.length < shortNameLength) {
             shortName = givenShortName + ".".repeat(shortNameLength - givenShortName.length)
         } else if (givenShortName.length > shortNameLength){
@@ -25,10 +26,10 @@ const Player = {
             return '016'
         }
 
-        players = [
-            ...players,
+        players.push(
             dbHelper.getNewPlayer(username, shortName, settings)
-        ]
+        )
+        return shortName
     },
     move: function(username, dir, players, settings){
         const { num_cols, num_rows } = settings
@@ -98,7 +99,6 @@ const Player = {
         player.actionTokens--
         return ''
     },
-
     /**
      * shoot - player shoots at coordinate on board
      * @param {string} username - username of player doing the action
@@ -161,7 +161,11 @@ const Player = {
             player.actionTokens -= numTokens
         }
 
-        return hitPlayer.username
+        return {
+            hitPlayer: hitPlayer.shortName,
+            player: player.name,
+            dead: hitPlayer.isDead
+        }
     },
     giftActionToken: function(username, coords, numTokens = 1, players, settings){
         return this.shoot(username, coords, players, settings, false, parseInt(numTokens))
@@ -178,11 +182,6 @@ const Player = {
 
         dbHelper.updatePlayer(uname, player)
     },
-    
-    /**
-     * @param {string} voterUname - username of Jurer
-     * @param {string} recipientUname - username that the Jurer submitted
-     */
     vote: function(voterName, recipientName, players){
         let voter = players.find(p => p.username = voterName)
         let recipient = players.find(p => p.shortName = recipientName)
@@ -229,13 +228,12 @@ const Player = {
             )
         }
     },
-
-    /**
-     * printPlayers - prints info of multiple players
-     * @param  {...string} unames - array of player names to print; if empty, will print all players
-     */
     printPlayers: function(players){
-        return players.map( p => this.printInfo(p) ).join("")
+        return players.length
+            ?
+            players.map( p => this.printInfo(p) ).join("")
+            :
+            Error['014']
     }
 }
 

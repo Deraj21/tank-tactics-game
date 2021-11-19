@@ -41,13 +41,19 @@
 
 ## TODO
 ### Node server Todo
-- [ ] convert code to use database
-  - [ ] vote
-  - [ ] test awarding daily tokens base on votes
-- [ ] validate setting exists when updating game setting, and correct datatype
+- ~~convert code to use database~~
+  - ~~vote~~
+- ~~validate setting exists when updating game setting, and correct datatype~~
 ### Testing
-  - [ ] get rachel to try a bunch of commands and rough test stuff out
-  - [ ] ask her to try and break it
+- get-votes
+- game-setting validation
+- move
+- shoot validations
+- gift token
+- gift token validations
+- vote (need rachel and 1 other player)
+- awarding daily tokens base on votes
+- get Rachel to try and break it
 ### BUGS
 - ...
 
@@ -95,4 +101,6 @@
 - make votes anonymous
   - [stack overflow - how to recieve](https://stackoverflow.com/questions/48729041/checking-if-a-message-is-a-dm-discord-js-and-discord-js-commando/51390434)
   - [stack overflow - how to send](https://stackoverflow.com/questions/41745070/sending-private-messages-to-user)
-- 
+- newly deceased players have skull/crossbones or rip where they were
+
+
