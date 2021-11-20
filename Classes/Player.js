@@ -4,7 +4,7 @@ import dbHelper from './dbHelper.js'
 
 
 const Player = {
-    joinGame: function(username, givenShortName, players, settings){
+    joinGame: function(username, givenShortName, players){
         const shortNameLength = 6
         // if already joined
         if (players.find(p => p.username === username)){
@@ -27,13 +27,13 @@ const Player = {
         }
 
         players.push(
-            dbHelper.getNewPlayer(username, shortName, settings)
+            dbHelper.getNewPlayer(username, shortName)
         )
         return shortName
     },
     move: function(username, dir, players, settings){
         const { num_cols, num_rows } = settings
-        let player = players.find(p => {p.username === username})
+        let player = players.find(p => p.username === username)
 
         if (player.actionTokens === 0){
             return '003'
@@ -163,11 +163,11 @@ const Player = {
 
         return {
             hitPlayer: hitPlayer.shortName,
-            player: player.name,
+            player: player.shortName,
             dead: hitPlayer.isDead
         }
     },
-    giftActionToken: function(username, coords, numTokens = 1, players, settings){
+    giftActionToken: function(username, players, settings, coords, numTokens = 1){
         return this.shoot(username, coords, players, settings, false, parseInt(numTokens))
     },
     // Not Used (right now)
@@ -222,7 +222,7 @@ const Player = {
             (
                 isDead
                 ?
-                Utils.getDeathMessage() + "\n"
+                `*${shortName}*` + Utils.getDeathMessage() + "\n"
                 :
                 `${health} hp,  ${range} range,  ${actionTokens} tokens\n`
             )

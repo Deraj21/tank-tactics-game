@@ -25,7 +25,7 @@ const Game = {
         // check type
         if (typeof settings[name] == 'number'){
             let numVal = parseInt(value)
-            if (numVal === NaN){
+            if (numVal == NaN){
                 return '020'
             }
             value = numVal
@@ -47,9 +47,8 @@ const Game = {
         settings[name] = value
         return value
     },
-    randomizePlayerPositions: function(players, settings){
-        console.log(settings)
-        const { num_rows, num_cols } = settings
+    setupGame: function(players, settings){
+        const { num_rows, num_cols, starting_health, starting_tokens, starting_range } = settings
         // create flat array of all coordinates
         let coords = []
         for (let r = 0; r < num_rows; r++){
@@ -59,7 +58,12 @@ const Game = {
         }
 
         players.forEach(player => {
-            // for each player, splice coordinate from the list
+            // apply settings
+            player.health = starting_health
+            player.actionTokens = starting_tokens
+            player.range = starting_range
+
+            // random coordinates
             let coordinates = Utils.randomFromList(coords).split('-')
             player.position.r = parseInt(coordinates[0])
             player.position.c = parseInt(coordinates[1])
@@ -94,8 +98,9 @@ const Game = {
         return ''
     },
     printVotes: function(votes){
+        let text = "**__ Vote Tallies __**\n"
         if ( !Object.keys(votes).length ){
-            return "No one has voted yet!"
+            return text + "No votes yet!"
         }
 
         let tally = {}
@@ -107,7 +112,6 @@ const Game = {
             }
         }
 
-        let text = "Vote Tallies:\n"
         for (let key in tally){
             text += `${key}: ${tally[key]}\n`
         }
@@ -196,11 +200,11 @@ const Game = {
 
         // scales
         const xScale = scaleLinear()
-            .domain([0, num_rows])
+            .domain([0, num_cols])
             .range([0, innerW])
 
         const yScale = scaleLinear()
-            .domain([0, num_cols])
+            .domain([0, num_rows])
             .range([0, innerH])
             .nice()
 

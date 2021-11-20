@@ -45,14 +45,13 @@ const dbHelper = {
         return db.set(`game.game_started`, bool)
     },
 
-    getNewPlayer: function(username, shortName, settings){
-        const { starting_health, starting_tokens, starting_range } = settings
+    getNewPlayer: function(username, shortName){
         return {
             username: username,
             shortName: shortName,
-            health: starting_health,
-            actionTokens: starting_tokens,
-            range: starting_range,
+            health: 0,
+            actionTokens: 0,
+            range: 0,
             position: { r: 0, c: 0 },
             color: Utils.hashRGB(username),
             isDead: false
@@ -71,18 +70,25 @@ const dbHelper = {
      }}
      */
     validateSetting: function(settingName){
+        let num_rows = n => n > 0,
+            num_cols = num_rows,
+            daily_token_count = num_rows,
+            starting_health = num_rows,
+            starting_tokens = n => n >= 0,
+            starting_range = num_rows
+        
         return {
-            num_rows: n => n > 0,
-            num_cols: this.num_rows,
-            daily_token_count: this.num_rows,
-            starting_health: this.num_rows,
-            starting_tokens: n => n >= 0,
-            starting_range: this.num_rows
+            num_rows,
+            num_cols,
+            daily_token_count,
+            starting_health,
+            starting_tokens,
+            starting_range
         }[settingName]
     },
-    getDummyData: function(settings){
+    getDummyData: function(){
         return Utils.dummyUsernames.map(username => {
-            return this.getNewPlayer(username, username.slice(0, 6), settings)
+            return this.getNewPlayer(username, username.slice(0, 6))
         })
     },
     logAll: function(string = ''){

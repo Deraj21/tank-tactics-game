@@ -96,7 +96,7 @@ Every command is prefaced with an exclamation point (`!`). Some commands need mo
 <!-- - `!end-game`: ends the current game; new game is ready to accept new players -->
 - `!reset-game`: resets the game to default state where settings can be changed, and players can join
 <!-- ### Admin post-MVP
-- `!game-setting <setting> <value>`: change game setting to given value.
+- `!change-setting <setting> <value>`: change game setting to given value.
     - **Settings**
         - board_height - integer
         - board_width - integer

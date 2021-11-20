@@ -51,6 +51,10 @@ async function parseCommand(msg){
         switch(command){
             case "!daily-tokens":
             case "!dt":
+                if (!gameStarted){
+                    msg.reply( Error['024'] )
+                    break;
+                }
                 printVotes = Game.printVotes(votes)
                 result = Game.giveDailyTokens(players, votes, settings)
                 
@@ -68,7 +72,7 @@ async function parseCommand(msg){
                 if (gameStarted){
                     msg.reply(Error['013'])
                 } else {
-                    Game.randomizePlayerPositions(players, settings)
+                    Game.setupGame(players, settings)
                     gameStarted = true
                     gameStartedUpdated = true
                     playersUpdated = true
@@ -83,7 +87,7 @@ async function parseCommand(msg){
             case "!add-test-data":
             case "!test-data":
                 if (!gameStarted){
-                    players = [ ...players, ...dbHelper.getDummyData(settings) ]
+                    players = [ ...players, ...dbHelper.getDummyData() ]
                     playersUpdated = true
                     msg.reply('test data set:\n' + Player.printPlayers(players))
                 } else {
@@ -106,15 +110,22 @@ async function parseCommand(msg){
                     boardUpdated = true
                 }
                 break;
-            case "!game-setting":
+            case "!change-setting":
+            case "!cs":
                 if (gameStarted){
                     msg.reply(Error['018'])
                 } else {
                     let settingName = args[0]
                     let settingValue = args[1]
                     // need to chack if setting exists & validate it is the same type
-                    settings[settingName] = settingValue
-                    msg.reply(`${settingName} has been set to ${settingValue}`) 
+
+                    result = Game.setGameSetting(settingName, settingValue, settings)
+                    if (catchError(result)){
+                        msg.reply(Error[result])
+                    } else {
+                        settingsUpdated = true
+                        msg.reply(`${settingName} has been set to ${result}`) 
+                    }
                 }
                 break;
             case "!get-settings":
@@ -126,6 +137,11 @@ async function parseCommand(msg){
         }
     }
 
+    if (players.findIndex(p => p.username == msg.author.username) === -1 && !isGM){
+        msg.reply( Error['023'] )
+        return
+    }
+
     // Players
     switch(command){
         case "!join":
@@ -133,7 +149,7 @@ async function parseCommand(msg){
             if (gameStarted){
                 result = '004'
             } else {
-                result = Player.joinGame(msg.author.username, args[0], players, settings)
+                result = Player.joinGame(msg.author.username, args[0], players)
             }
             
             if (catchError(result)){
@@ -171,12 +187,12 @@ async function parseCommand(msg){
             break;
         case "!gift-token":
         case "!gt":
-            result = Player.giftActionToken(msg.author.username, ...args, players, settings)
+            result = Player.giftActionToken(msg.author.username, players, settings, ...args)
 
             if (catchError(result)){
                 msg.reply(Error[result])
             } else {
-                msg.reply(`${res.player.shortName} gifted token(s) to ${res.hitPlayer.shortName}`)
+                msg.reply(`${result.player} gifted token(s) to ${result.hitPlayer}`)
                 boardUpdated = true
                 playersUpdated = true
             }

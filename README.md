@@ -45,13 +45,13 @@
   - ~~vote~~
 - ~~validate setting exists when updating game setting, and correct datatype~~
 ### Testing
+- ~~game-setting validation~~
+- ~~move~~
+- ~~shoot validations~~
+- ~~gift token~~
+- ~~gift token validations~~
+- vote (need rachel and 2 other players)
 - get-votes
-- game-setting validation
-- move
-- shoot validations
-- gift token
-- gift token validations
-- vote (need rachel and 1 other player)
 - awarding daily tokens base on votes
 - get Rachel to try and break it
 ### BUGS
