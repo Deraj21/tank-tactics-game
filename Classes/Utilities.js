@@ -86,8 +86,8 @@ export default {
             " has un-alived.",
             " kicked the bucket.",
             " is being let go.",
-            "'s life is going in a different direction.",
-            "'s tank is part of a permanent outplacement."
+            " is going in a different direction.",
+            " is part of a permanent outplacement."
         ])
     }
 }

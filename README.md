@@ -3,7 +3,6 @@
   - [MVP](#mvp)
 - [Questions](#questions)
 - [TODO](#todo)
-  - [Node server Todo](#node-server-todo)
   - [Testing](#testing)
   - [BUGS](#bugs)
 - [Useful Links](#useful-links)
@@ -40,20 +39,15 @@
 ---
 
 ## TODO
-### Node server Todo
-- ~~convert code to use database~~
-  - ~~vote~~
-- ~~validate setting exists when updating game setting, and correct datatype~~
 ### Testing
-- ~~game-setting validation~~
-- ~~move~~
-- ~~shoot validations~~
-- ~~gift token~~
-- ~~gift token validations~~
-- vote (need rachel and 2 other players)
-- get-votes
-- awarding daily tokens base on votes
-- get Rachel to try and break it
+- ~~fix validations for players that haven't joined~~
+- ~~vote (need rachel and 2 other players)~~
+- ~~get-votes~~
+- ~~awarding daily tokens base on votes~~
+- ~~dead players can only vote~~
+- try to BREAK it!
+  - try commands with wrong params
+  - try commands with no params
 ### BUGS
 - ...
 

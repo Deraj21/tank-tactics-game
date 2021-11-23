@@ -34,12 +34,16 @@ async function parseCommand(msg){
     let invalidCommand = false
     let boardUpdated = false
     let playersUpdated = false
+    let votesUpdated = false
     let settingsUpdated = false
     let gameStartedUpdated = false
     let printPlayers = false
     let printSettings = false
     let printVotes = ''
     let result = null
+
+    let notYetJoined = false
+    let playerIsDead = false
 
     let players = await dbHelper.getPlayers()
     let settings = await dbHelper.getGameSettings()
@@ -55,7 +59,7 @@ async function parseCommand(msg){
                     msg.reply( Error['024'] )
                     break;
                 }
-                printVotes = Game.printVotes(votes)
+                printVotes = Game.printVotes({ ...votes })
                 result = Game.giveDailyTokens(players, votes, settings)
                 
                 if (catchError(result)){
@@ -63,6 +67,8 @@ async function parseCommand(msg){
                 } else {
                     boardUpdated = true
                     playersUpdated = true
+                    votesUpdated = true
+                    votes = {} // 'forget' votes
                     msg.reply(`${msg.author.username} has given out tokens!`)
                 }
 
@@ -131,15 +137,21 @@ async function parseCommand(msg){
             case "!get-settings":
                 printSettings = true
                 break;
+            case "!ping":
+                msg.reply("pong!")
+                break;
             default:
                 invalidCommand = true
                 break;
         }
     }
-
-    if (players.findIndex(p => p.username == msg.author.username) === -1 && !isGM){
-        msg.reply( Error['023'] )
-        return
+    
+    // if 'non-players' (haven't used !join)
+    let index = players.findIndex(p => p.username == msg.author.username)
+    if (index === -1){
+        notYetJoined = true
+    } else {
+        playerIsDead = players[index].isDead
     }
 
     // Players
@@ -162,6 +174,18 @@ async function parseCommand(msg){
             break;
         case "!move":
         case "!m":
+            if (notYetJoined){
+                msg.reply(Error['023'])
+                return
+            }
+            if (!gameStarted){
+                msg.reply(Error['017'])
+                return
+            }
+            if(playerIsDead){
+                msg.reply(Error['025'])
+                return
+            }
             result = Player.move(msg.author.username, args[0], players, settings)
             if (result){
                 msg.reply(Error[result])
@@ -173,6 +197,18 @@ async function parseCommand(msg){
             break;
         case "!shoot":
         case "!s":
+            if (notYetJoined){
+                msg.reply(Error['023'])
+                return
+            }
+            if (!gameStarted){
+                msg.reply(Error['017'])
+                return
+            }
+            if(playerIsDead){
+                msg.reply(Error['025'])
+                return
+            }
             result = Player.shoot(msg.author.username, args[0], players, settings)
 
             if (catchError(result)){
@@ -187,6 +223,18 @@ async function parseCommand(msg){
             break;
         case "!gift-token":
         case "!gt":
+            if (notYetJoined){
+                msg.reply(Error['023'])
+                return
+            }
+            if (!gameStarted){
+                msg.reply(Error['017'])
+                return
+            }
+            if(playerIsDead){
+                msg.reply(Error['025'])
+                return
+            }
             result = Player.giftActionToken(msg.author.username, players, settings, ...args)
 
             if (catchError(result)){
@@ -199,18 +247,26 @@ async function parseCommand(msg){
             break;
         case "!vote":
         case "!v":
-            result = Player.vote(msg.author.username, args[0], players)
+            if (notYetJoined){
+                msg.reply(Error['023'])
+                return
+            }
+            if (!gameStarted){
+                msg.reply(Error['017'])
+                return
+            }
+            result = Player.vote(msg.author.username, args[0], players, votes)
             
             if (catchError(result)){
                 msg.reply(Error[result])
             } else {
-                msg.reply(`player ${msg.author.username} is voting for ${args.join(' ')}`)
-                msg.author.send('You can start DMing me now')
+                msg.reply(`player **${result}** voted for **${args.join(' ')}**`)
+                votesUpdated = true
+
+                // msg.author.send('You can start DMing me now')
+                // TODO: figure out how to do private voting
             }
 
-            break;
-        case "!ping":
-            msg.reply("pong!")
             break;
         default:
             if (invalidCommand || !isGM){
@@ -218,6 +274,7 @@ async function parseCommand(msg){
             }
             break;
     }
+
 
     let promises = []
 
@@ -227,6 +284,9 @@ async function parseCommand(msg){
     }
     if (playersUpdated){
         dbHelper.updatePlayers(players)
+    }
+    if (votesUpdated){
+        dbHelper.updateVotes(votes)
     }
     if (printPlayers){
         msg.reply(Player.printPlayers(players))

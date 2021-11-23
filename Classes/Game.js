@@ -72,8 +72,7 @@ const Game = {
         coords = []
     },
     giveDailyTokens: function(players, votes, settings){
-        const votes_for_token = 3 // TODO: change to setting
-        const { daily_token_count } = settings
+        const { daily_token_count, votes_needed, bonus_tokens } = settings
 
         let tally = {}
         for (let key in votes){
@@ -87,14 +86,12 @@ const Game = {
         players.forEach(player => {
             if (!player.isDead){
                 player.actionTokens += parseInt(daily_token_count)
-                if (tally[player.username] >= votes_for_token){
-                    player.actionTokens += parsInt(daily_token_count)
+                if (tally[player.shortName] >= votes_needed){
+                    player.actionTokens += bonus_tokens
                 }
             }
         })
 
-        // 'forget' votes
-        votes = {}
         return ''
     },
     printVotes: function(votes){

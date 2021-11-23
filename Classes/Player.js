@@ -182,12 +182,12 @@ const Player = {
 
         dbHelper.updatePlayer(uname, player)
     },
-    vote: function(voterName, recipientName, players){
-        let voter = players.find(p => p.username = voterName)
-        let recipient = players.find(p => p.shortName = recipientName)
+    vote: function(voterName, recipientName, players, votes){
+        let voter = players.find(p => p.username == voterName)
+        let recipient = players.find(p => p.shortName == recipientName)
 
         // make sure players exist
-        if (voter === null || recipient === null){
+        if (recipient === null || recipient === undefined){
             return '007'
         }
 
@@ -199,6 +199,10 @@ const Player = {
         if (recipient.isDead){
             return '006'
         }
+
+        votes[voterName] = recipientName
+
+        return voter.shortName
 
     },
     /**
