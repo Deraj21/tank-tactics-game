@@ -4,6 +4,7 @@
 - [Questions](#questions)
 - [TODO](#todo)
   - [Testing](#testing)
+  - [Update Documentation](#update-documentation)
   - [BUGS](#bugs)
 - [Useful Links](#useful-links)
 - [Post-MVP Ideas](#post-mvp-ideas)
@@ -26,7 +27,7 @@
 - I should not be able to call out actions if I don't have any action tokens
 - I need a way to join the game
   - admin command
-- As a Jurer (dead player), I need to votte for a person to get an extra action token; I need this vote to be anonymous
+- As a Juror (dead player), I need to vote for a person to get an extra action token; I need this vote to be anonymous
 
 ---
 
@@ -40,14 +41,16 @@
 
 ## TODO
 ### Testing
-- ~~fix validations for players that haven't joined~~
-- ~~vote (need rachel and 2 other players)~~
-- ~~get-votes~~
-- ~~awarding daily tokens base on votes~~
-- ~~dead players can only vote~~
 - try to BREAK it!
-  - try commands with wrong params
-  - try commands with no params
+- try commands with wrong params
+- try commands with no params
+### Update Documentation
+- ~~go through each command, and make sure it is in commands section~~
+  - ~~game settings section~~
+- ~~change 3 characters to 6 for nicknaming~~
+- ~~explain nickname when first bringing up !join command (or at least reference the command guide, so players can look it up)~~
+- ~~update channel explanations in the welcome to the server channel~~
+- generally read through everything and make edits where needed.
 ### BUGS
 - ...
 
@@ -62,14 +65,14 @@
 - ~~remove player from game~~
   - this seems to be not needed. if a player is being abusive, kick them from the server. If a player just doesn't want to play the game anymore, their tank can just sit there and not play
 - players can upgrade their range
-  - should this be permanant or temporary?
+  - should this be permanent or temporary?
   - what should the cost be?
 - dead player's tokens are left on the board
 - players can only see as far as their range allows
   - this potentially could add another dimension, making information a commodity to be traded, lied about, etc.
   - however, this is a pretty big ask
     - this means that players will each need to see their own personal board
-    - either DMed individually, or maybe building the actual HTML app that reads the replit database, and generates the board based on a key you give it.
+    - either DMed individually, or maybe building the actual HTML app that reads the Replit database, and generates the board based on a key you give it.
   - what if players text each other screen-shots of their board? is that just part of the game?
     - if the understanding is that we don't send board screenshots, then the game is more about "do I trust the info given me?"
     - but if that is allowed, then bargaining with a screenshot of your board could be interesting in its own right
@@ -78,7 +81,7 @@
 - create a mongoDB database te replace replit database
 - Tons of settings
   - 'daily' token interval (minutes, hours, days)
-  - first token givout time
+  - first token give-out time
   - max number of players
   - allow cease fires
   - cease fire interval
@@ -93,7 +96,7 @@
   - given to player at a token cost as another tool
 - terrain that costs extra movement or can't be moved through or shot through?
 - make votes anonymous
-  - [stack overflow - how to recieve](https://stackoverflow.com/questions/48729041/checking-if-a-message-is-a-dm-discord-js-and-discord-js-commando/51390434)
+  - [stack overflow - how to receive](https://stackoverflow.com/questions/48729041/checking-if-a-message-is-a-dm-discord-js-and-discord-js-commando/51390434)
   - [stack overflow - how to send](https://stackoverflow.com/questions/41745070/sending-private-messages-to-user)
 - newly deceased players have skull/crossbones or rip where they were
 

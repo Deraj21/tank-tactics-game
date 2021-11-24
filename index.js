@@ -25,6 +25,8 @@ let votes
 // dbHelper.updateVotes({})
 // dbHelper.getAll()
 
+dbHelper.getGameSettings()
+    .then(settings => console.log(settings))
 
 async function parseCommand(msg){
     let args = msg.content.split(' ')
@@ -90,23 +92,11 @@ async function parseCommand(msg){
                 dbHelper.resetGame()
                 msg.reply("Game has been reset. Players can join until the game starts")
                 break;
-            case "!add-test-data":
-            case "!test-data":
-                if (!gameStarted){
-                    players = [ ...players, ...dbHelper.getDummyData() ]
-                    playersUpdated = true
-                    msg.reply('test data set:\n' + Player.printPlayers(players))
-                } else {
-                    msg.reply(Error['015'])
-                }
-                break;
             case "!get-players":
                 printPlayers = true
                 break;
             case "!get-votes":
                 printVotes = Game.printVotes(votes)
-                break;
-            case "!clear-channel": // post-mvp
                 break;
             case "!get-board":
             case "!gb":
@@ -123,7 +113,7 @@ async function parseCommand(msg){
                 } else {
                     let settingName = args[0]
                     let settingValue = args[1]
-                    // need to chack if setting exists & validate it is the same type
+                    // need to check if setting exists & validate it is the same type
 
                     result = Game.setGameSetting(settingName, settingValue, settings)
                     if (catchError(result)){
@@ -139,6 +129,18 @@ async function parseCommand(msg){
                 break;
             case "!ping":
                 msg.reply("pong!")
+                break;
+            case "!add-test-data":
+            case "!test-data":
+                if (!gameStarted){
+                    players = [ ...players, ...dbHelper.getDummyData() ]
+                    playersUpdated = true
+                    msg.reply('test data set:\n' + Player.printPlayers(players))
+                } else {
+                    msg.reply(Error['015'])
+                }
+                break;
+            case "!clear-channel": // post-mvp
                 break;
             default:
                 invalidCommand = true
@@ -306,34 +308,34 @@ async function parseCommand(msg){
 
 }
 
-/////////
-// EVENTS
-client.on('ready', () => {
-    console.log(`Logged in as ${client.user.tag}!`)
-})
+// /////////
+// // EVENTS
+// client.on('ready', () => {
+//     console.log(`Logged in as ${client.user.tag}!`)
+// })
 
-client.on('messageCreate', msg => {
-    // console.log("channel type: ", msg.channel.type)
+// client.on('messageCreate', msg => {
+//     // console.log("channel type: ", msg.channel.type)
 
-    if (msg.author.bot) return;
+//     if (msg.author.bot) return;
     
-    if (msg.channel.name === "call-out-moves") {
-        if (msg.content.match(/^\!.*/)){ // starts with !
-            parseCommand(msg)
-        }
-    } else if (msg.channel.type === "DM") {
-        msg.author.send("You are DMing me now!")
-    }
+//     if (msg.channel.name === "call-out-moves") {
+//         if (msg.content.match(/^\!.*/)){ // starts with !
+//             parseCommand(msg)
+//         }
+//     } else if (msg.channel.type === "DM") {
+//         msg.author.send("You are DMing me now!")
+//     }
 
-})
+// })
 
 
-// Bot log in
-client.login(DISCORD_TOKEN)
-    .then(res => {
-        console.log(res)
-    })
-    .catch(err => {
-        console.log(err)
-    })
+// // Bot log in
+// client.login(DISCORD_TOKEN)
+//     .then(res => {
+//         console.log(res)
+//     })
+//     .catch(err => {
+//         console.log(err)
+//     })
 
