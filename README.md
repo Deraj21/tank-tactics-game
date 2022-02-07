@@ -51,6 +51,11 @@
 - ~~explain nickname when first bringing up !join command (or at least reference the command guide, so players can look it up)~~
 - ~~update channel explanations in the welcome to the server channel~~
 - generally read through everything and make edits where needed.
+### Feedback
+- Health
+  - It is hard to see how many health you have with just slices of a heart
+  - use a bar, or a number, or both?
+- Make the whole generated picture longer with stats on the side?
 ### BUGS
 - ...
 
